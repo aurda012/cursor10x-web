@@ -7,21 +7,20 @@ import * as prompts from "@/lib/prompts";
 export const config = {
   runtime: 'edge',
   regions: ['iad1'], // Use the regions closest to your primary user base
-  maxDuration: 300, // Allow up to 300 seconds (5 minutes) for generation - increased from 60 seconds
+  maxDuration: 300, // Reverting to 60 seconds for compatibility with Edge runtime
 };
 
 // In-memory store for chat history (in a production app, use a database)
 const chatHistories = new Map<string, any[]>();
 
-// Function to log even in production mode
+// Simplified logging function that works in all environments
 const forceLog = (message: string) => {
-  // This will bypass the removeConsole setting in next.config.ts
-  try {
-    // Use both console methods to maximize chances of logging
-    console.error(`[FORCE_LOG] ${message}`);
-    console.warn(`[FORCE_LOG] ${message}`);
-  } catch (e) {
-    // Ignore any errors in logging
+  // Only log in non-production or use error channel in production
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[DEBUG] ${message}`);
+  } else {
+    // Error logs are preserved in production
+    console.error(`[PROD_LOG] ${message}`);
   }
 };
 
@@ -271,7 +270,7 @@ export async function POST(
             // Process each chunk from the Gemini API stream
             try {
               forceLog(`Starting chunk processing for ${artifact}`);
-              let chunkTimeStart = Date.now();
+              const chunkTimeStart = Date.now();
               let lastLogTime = Date.now();
               
               for await (const chunk of streamingResponse) {
@@ -282,8 +281,8 @@ export async function POST(
                   break;
                 }
                 
-                // Log progress periodically even in production
-                if (currentTime - lastLogTime > 5000) { // Log every 5 seconds
+                // Log progress periodically but less frequently to avoid overwhelming logs
+                if (currentTime - lastLogTime > 10000) { // Log every 10 seconds
                   forceLog(`Still processing chunks for ${artifact}, elapsed time: ${Math.floor((currentTime - chunkTimeStart)/1000)}s, chunks: ${chunkCount}`);
                   lastLogTime = currentTime;
                 }
@@ -312,12 +311,12 @@ export async function POST(
                   totalBytes += processedText.length;
                   chunkCount++;
 
-                  // Log every 5th chunk or the first few chunks
-                  if (chunkCount % 5 === 0 || chunkCount < 3) {
-                    forceLog(`Sending chunk ${chunkCount} for ${artifact}, size: ${processedText.length} bytes, total: ${totalBytes} bytes`);
+                  // Only log key chunks to reduce log volume
+                  if (chunkCount === 1 || chunkCount === 10 || chunkCount === 50 || chunkCount % 100 === 0) {
+                    forceLog(`Sending chunk ${chunkCount} for ${artifact}, total bytes: ${totalBytes}`);
                   }
 
-                  // Send the chunk to the client, break if controller is closed
+                  // Send the chunk to the client
                   if (!safeEnqueue(encoder.encode(processedText))) {
                     forceLog(`Failed to enqueue chunk ${chunkCount} for ${artifact}, stopping.`);
                     break;

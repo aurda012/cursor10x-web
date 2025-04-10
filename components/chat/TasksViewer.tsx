@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useRef } from "react";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,7 +18,7 @@ const TasksViewer: React.FC<TasksViewerProps> = ({ stream, onComplete }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitError, setIsRateLimitError] = useState<boolean>(false);
-  const [parsedJson, setParsedJson] = useState<any>(null);
+  const [parsedJson, setParsedJson] = useState<unknown>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
   const contentContainerRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +122,6 @@ const TasksViewer: React.FC<TasksViewerProps> = ({ stream, onComplete }) => {
             setContent(result);
 
             // Only try to parse as JSON if it looks like a complete JSON
-            // Avoid trying to parse incomplete JSON during streaming
             if (result.trim().endsWith('}') || result.trim().endsWith(']')) {
               const parsedData = parseJsonSafely(result);
               if (parsedData) {
@@ -129,11 +130,13 @@ const TasksViewer: React.FC<TasksViewerProps> = ({ stream, onComplete }) => {
             }
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Tasks stream error:", err);
 
         if (isMounted) {
-          const errorMessage = err.message || "Error processing stream";
+          const errorMessage = typeof err === 'object' && err !== null && 'message' in err 
+            ? (err as Error).message 
+            : "Error processing stream";
           let displayError = errorMessage;
 
           // Customize error messages for better UX

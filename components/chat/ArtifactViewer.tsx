@@ -53,11 +53,25 @@ export function ArtifactViewer({
       reader = stream.getReader();
       const decoder = new TextDecoder();
       let result = "";
+      
+      // Optimized rendering strategy
+      let lastRenderTime = Date.now();
+      const RENDER_THROTTLE = 50; // ms between renders to avoid UI jank
+      let pendingContent = ""; // buffer for content between renders
 
       while (true) {
         const { value, done } = await reader.read();
 
         if (done) {
+          // Render any remaining content
+          if (pendingContent && isMounted) {
+            result += pendingContent;
+            setContent(result);
+            if (onContentUpdate) {
+              onContentUpdate(result);
+            }
+          }
+          
           if (isMounted) {
             setIsLoading(false);
             if (onComplete) onComplete();
@@ -66,13 +80,20 @@ export function ArtifactViewer({
         }
 
         const text = decoder.decode(value, { stream: true });
-        result += text;
-
-        if (isMounted) {
-          setContent(result);
-          if (onContentUpdate) {
-            onContentUpdate(result);
+        pendingContent += text;
+        
+        // Only update UI at throttled intervals to prevent jank
+        const now = Date.now();
+        if (now - lastRenderTime >= RENDER_THROTTLE) {
+          result += pendingContent;
+          if (isMounted) {
+            setContent(result);
+            if (onContentUpdate) {
+              onContentUpdate(result);
+            }
           }
+          pendingContent = ""; // Clear pending content after rendering
+          lastRenderTime = now;
         }
       }
     } catch (err: any) {

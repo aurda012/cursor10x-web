@@ -4,7 +4,7 @@ import { UserAnswers } from "@/types";
  * The introduction message displayed at the start of the conversation
  */
 export const AGENT_INTRODUCTION_MESSAGE =
-  "Welcome to Cursor10x! 👋 I'll help you create a comprehensive project blueprint, file/folder architecture, implementation guide, and detailed development tasks through a series of questions. By the end you'll have a zip file including all of these things along with the entire Cursor10x system that includes a multi-agent team with memory persistence, inter-agent communication, and ready to go task management workflow. Make sure to answer all questions with as much detail as possible for best results. Let's get started with the basics..";
+  "Welcome to Cursor10x! 👋 I'll help you create a comprehensive project blueprint, file/folder architecture, implementation guide, and detailed development tasks through a series of questions. By the end you'll have a zip file including all of these things along with the entire Cursor10x system that includes a multi-layered memory system with autonomous persistence, dedicated cursor rules for top efficiency, and ready to go task management system. Make sure to answer all questions with as much detail as possible for best results. Let's get started with the basics..";
 
 /**
  * Question objects with keys matching UserAnswers interface

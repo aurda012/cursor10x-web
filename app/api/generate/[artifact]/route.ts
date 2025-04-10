@@ -273,6 +273,12 @@ export async function POST(
               const chunkTimeStart = Date.now();
               let lastLogTime = Date.now();
               
+              // Buffer for collecting small chunks
+              let buffer = "";
+              const BUFFER_SIZE_THRESHOLD = 100; // Reduced from 500 characters to 100 for smoother streaming
+              const BUFFER_TIME_THRESHOLD = 30; // Reduced from 100ms to 30ms to send chunks more frequently
+              let lastBufferFlushTime = Date.now();
+              
               for await (const chunk of streamingResponse) {
                 const currentTime = Date.now();
                 
@@ -281,7 +287,7 @@ export async function POST(
                   break;
                 }
                 
-                // Log progress periodically but less frequently to avoid overwhelming logs
+                // Log progress periodically but less frequently
                 if (currentTime - lastLogTime > 10000) { // Log every 10 seconds
                   forceLog(`Still processing chunks for ${artifact}, elapsed time: ${Math.floor((currentTime - chunkTimeStart)/1000)}s, chunks: ${chunkCount}`);
                   lastLogTime = currentTime;
@@ -295,33 +301,42 @@ export async function POST(
                   if (artifact === "tasks") {
                     // Remove markdown code block markers from beginning and end of chunks
                     if (chunkCount === 0 && processedText.startsWith("```")) {
-                      // Remove opening markdown markers from first chunk
-                      processedText = processedText.replace(
-                        /^```(json)?[\r\n]+/,
-                        ""
-                      );
+                      processedText = processedText.replace(/^```(json)?[\r\n]+/, "");
                     }
                     if (processedText.endsWith("```")) {
-                      // Remove closing markdown markers
                       processedText = processedText.replace(/[\r\n]+```$/, "");
                     }
                   }
 
+                  // Add to response text for history
                   responseText += processedText;
                   totalBytes += processedText.length;
                   chunkCount++;
 
+                  // Add to buffer instead of sending directly
+                  buffer += processedText;
+                  
                   // Only log key chunks to reduce log volume
                   if (chunkCount === 1 || chunkCount === 10 || chunkCount === 50 || chunkCount % 100 === 0) {
-                    forceLog(`Sending chunk ${chunkCount} for ${artifact}, total bytes: ${totalBytes}`);
+                    forceLog(`Processed chunk ${chunkCount} for ${artifact}, total bytes: ${totalBytes}, buffer size: ${buffer.length}`);
                   }
-
-                  // Send the chunk to the client
-                  if (!safeEnqueue(encoder.encode(processedText))) {
-                    forceLog(`Failed to enqueue chunk ${chunkCount} for ${artifact}, stopping.`);
-                    break;
+                  
+                  // Send buffer when it exceeds threshold or time limit
+                  const bufferTime = currentTime - lastBufferFlushTime;
+                  if (buffer.length >= BUFFER_SIZE_THRESHOLD || bufferTime >= BUFFER_TIME_THRESHOLD) {
+                    if (!safeEnqueue(encoder.encode(buffer))) {
+                      forceLog(`Failed to enqueue buffered chunks for ${artifact}, stopping.`);
+                      break;
+                    }
+                    buffer = "";
+                    lastBufferFlushTime = currentTime;
                   }
                 }
+              }
+              
+              // Send any remaining buffered content
+              if (buffer.length > 0) {
+                safeEnqueue(encoder.encode(buffer));
               }
               
               forceLog(`Completed chunk processing for ${artifact}: ${chunkCount} chunks, ${totalBytes} bytes in ${Math.floor((Date.now() - chunkTimeStart)/1000)}s`);

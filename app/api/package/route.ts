@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import JSZip from "jszip";
-import path from "path";
+import fs from "fs";
 import { PackageRequestBody } from "@/types";
 
 // Configure with higher default memory and longer execution time for ZIP operations
@@ -73,16 +73,65 @@ export async function POST(request: NextRequest) {
             }
           }
         }, null, 2));
+        
+        // Add the rules directory and all its contents
+        const rulesFolder = cursorFolder.folder("rules");
+        if (rulesFolder) {
+          // Read all the MDC rule files from the templates directory
+          const rulesTemplateDir = "templates/cursor10x/.cursor/rules";
+          try {
+            // Check if directory exists
+            if (fs.existsSync(rulesTemplateDir)) {
+              const ruleFiles = fs.readdirSync(rulesTemplateDir);
+              
+              // Add each rule file to the zip
+              for (const fileName of ruleFiles) {
+                const filePath = `${rulesTemplateDir}/${fileName}`;
+                // Only add files, not directories
+                if (fs.statSync(filePath).isFile()) {
+                  const content = fs.readFileSync(filePath, 'utf8');
+                  rulesFolder.file(fileName, content);
+                  console.log(`Added rule file to zip: ${fileName}`);
+                }
+              }
+            } else {
+              console.warn(`Rules template directory not found: ${rulesTemplateDir}`);
+            }
+          } catch (error) {
+            console.error(`Error adding rule files to zip:`, error);
+          }
+        }
       }
 
-      // Add .cursorrules file
-      zip.file(".cursorrules", `
+      // Add .cursorrules file - read from template instead of hardcoding
+      try {
+        const cursorrulespath = "templates/cursor10x/.cursorrules";
+        if (fs.existsSync(cursorrulespath)) {
+          const cursorrules = fs.readFileSync(cursorrulespath, 'utf8');
+          zip.file(".cursorrules", cursorrules);
+          console.log("Added .cursorrules file to zip from template");
+        } else {
+          console.warn(".cursorrules template file not found, using fallback content");
+          // Fallback content
+          zip.file(".cursorrules", `
 # Cursor10x Rules
 - Follow Memory System guidelines
 - Implement Project Tasks sequentially
 - Track active files during implementation
 - Store milestones when completing tasks
-      `);
+          `);
+        }
+      } catch (error) {
+        console.error("Error adding .cursorrules file to zip:", error);
+        // Add fallback content if there's an error
+        zip.file(".cursorrules", `
+# Cursor10x Rules
+- Follow Memory System guidelines
+- Implement Project Tasks sequentially
+- Track active files during implementation
+- Store milestones when completing tasks
+        `);
+      }
 
       // Add .gitignore
       zip.file(".gitignore", `

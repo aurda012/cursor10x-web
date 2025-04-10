@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+.vercel
+out
+build
+dist
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and local files
+.env.local
+.env*.local
+
+# Package files
+package-lock.json
+yarn.lock
+*.zip
+
+# Cache
+.cache 

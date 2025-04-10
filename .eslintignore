@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+.vercel
+out
+build
+dist
+
+# Config files
+*.config.js
+*.config.mjs
+
+# Logs
+*.log
+
+# Generated files
+next-env.d.ts 

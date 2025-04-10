@@ -1,0 +1,932 @@
+{
+  "tasks": [
+    // Phase 0: Project Setup & Initial Configuration
+    {
+      "id": "001",
+      "filename": "task_001_init_nextjs.txt",
+      "title": "Initialize Next.js Project",
+      "file": "./",
+      "status": "complete",
+      "prompt": "Execute `npx create-next-app@latest cursor10x-web-app --typescript --tailwind --eslint --app` in your terminal. Follow the prompts, ensuring TypeScript, Tailwind CSS, ESLint, and the App Router are selected. Verify the creation of the base Next.js project structure and files including `package.json`, `tsconfig.json`, `next.config.mjs`, `tailwind.config.ts`, `app/layout.tsx`, `app/page.tsx` etc."
+    },
+    {
+      "id": "002",
+      "filename": "task_002_update_package_json.txt",
+      "title": "Update package.json Details",
+      "file": "package.json",
+      "status": "complete",
+      "prompt": "Open the `package.json` file. Update the `name` (if needed), `description` ('Web application to generate project blueprints and starter kits via AI chat'), `author`, and add a `repository` field if applicable. Ensure basic scripts like `dev`, `build`, `start`, `lint` are present from the Next.js initialization."
+    },
+    {
+      "id": "003",
+      "filename": "task_003_create_readme.txt",
+      "title": "Create Initial README.md",
+      "file": "README.md",
+      "status": "complete",
+      "prompt": "Create a file named `README.md` in the project root. Add the main title '# Cursor10x Web' and a brief paragraph describing the project's purpose based on the blueprint's executive summary: 'This application guides users through defining their project requirements via a chat interface and uses AI to generate a technical blueprint, file architecture, implementation guide, and development tasks, packaged into a downloadable zip file.'"
+    },
+    {
+      "id": "004",
+      "filename": "task_004_install_prettier.txt",
+      "title": "Install Prettier and Tailwind Plugin",
+      "file": "package.json",
+      "status": "complete",
+      "prompt": "Run `npm install --save-dev prettier prettier-plugin-tailwindcss` to install Prettier and its plugin for sorting Tailwind classes."
+    },
+    {
+      "id": "005",
+      "filename": "task_005_create_prettier_config.txt",
+      "title": "Create Prettier Configuration File",
+      "file": "prettier.config.js",
+      "status": "complete",
+      "prompt": "Create `prettier.config.js` in the project root. Configure it to use the Tailwind plugin and set basic formatting rules. Example configuration: `module.exports = { plugins: ['prettier-plugin-tailwindcss'], semi: true, singleQuote: false, trailingComma: 'es5' };`"
+    },
+    {
+      "id": "006",
+      "filename": "task_006_create_prettier_ignore.txt",
+      "title": "Create .prettierignore File",
+      "file": ".prettierignore",
+      "status": "complete",
+      "prompt": "Create a `.prettierignore` file in the project root. Add entries for files and directories that Prettier should not format, such as: `node_modules`, `.next`, `.vercel`, `*.log`, `package-lock.json`, `*.zip`, `.env.local`."
+    },
+    {
+      "id": "007",
+      "filename": "task_007_update_eslint_config.txt",
+      "title": "Integrate Prettier with ESLint Configuration",
+      "file": "eslint.config.mjs",
+      "status": "complete",
+      "prompt": "Open ESLint configuration file. Add `'prettier'` to the end of the `extends` array to ensure ESLint uses Prettier's rules and doesn't report formatting conflicts. The extends statement should include \"prettier\"."
+    },
+    {
+      "id": "008",
+      "filename": "task_008_create_eslint_ignore.txt",
+      "title": "Create .eslintignore File",
+      "file": ".eslintignore",
+      "status": "complete",
+      "prompt": "Create a `.eslintignore` file in the project root. Add entries for files/directories ESLint should ignore, similar to `.prettierignore`, such as `node_modules`, `.next`, `.vercel`, `*.config.js` (if desired)."
+    },
+    {
+      "id": "009",
+      "filename": "task_009_install_husky_lintstaged.txt",
+      "title": "Install Husky and lint-staged",
+      "file": "package.json",
+      "status": "complete",
+      "prompt": "Run `npm install --save-dev husky lint-staged`."
+    },
+    {
+      "id": "010",
+      "filename": "task_010_init_husky.txt",
+      "title": "Initialize Husky",
+      "file": ".husky/",
+      "status": "skipped",
+      "prompt": "Run `npx husky init` in the terminal. This will create the `.husky/` directory and a sample pre-commit hook."
+    },
+    {
+      "id": "011",
+      "filename": "task_011_configure_precommit_hook.txt",
+      "title": "Configure Husky Pre-commit Hook",
+      "file": ".husky/pre-commit",
+      "status": "skipped",
+      "prompt": "Edit the `.husky/pre-commit` file. Replace its content with `#!/bin/sh\n. \"$(dirname \"$0\")/_/husky.sh\"\n\nnpx lint-staged` to ensure lint-staged runs before commits."
+    },
+    {
+      "id": "012",
+      "filename": "task_012_configure_lintstaged.txt",
+      "title": "Configure lint-staged in package.json",
+      "file": "package.json",
+      "status": "skipped",
+      "prompt": "Add a `lint-staged` key to your `package.json`. Configure it to run formatting and linting on staged files. Example: `\"lint-staged\": { \"*.{js,jsx,ts,tsx}\": [\"eslint --fix\", \"prettier --write\"], \"*.{json,md,css}\": [\"prettier --write\"] }`"
+    },
+    {
+      "id": "013",
+      "filename": "task_013_init_shadcn_ui.txt",
+      "title": "Initialize Shadcn/UI",
+      "file": "components.json",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest init` in the terminal. Select TypeScript: Yes, Style: Default, Base color: Slate. Locate global CSS file: `app/globals.css`. Use CSS variables: Yes. Tailwind config: `tailwind.config.ts`. Configure import alias for components: `@/components`. Configure import alias for utils: `@/lib/utils`. Use React Server Components: Yes. Write configuration to `components.json`: Yes. This will create `components.json`, `lib/utils.ts` and update `tailwind.config.ts` and `styles/globals.css`."
+    },
+    {
+      "id": "014",
+      "filename": "task_014_add_shadcn_card.txt",
+      "title": "Add Shadcn/UI Card Component",
+      "file": "components/ui/card.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add card`. Verify the creation of `components/ui/card.tsx`."
+    },
+    {
+      "id": "015",
+      "filename": "task_015_add_shadcn_scrollarea.txt",
+      "title": "Add Shadcn/UI ScrollArea Component",
+      "file": "components/ui/scroll-area.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add scroll-area`. Verify the creation of `components/ui/scroll-area.tsx` and `components/ui/separator.tsx` if it's a dependency."
+    },
+    {
+      "id": "016",
+      "filename": "task_016_add_shadcn_textarea.txt",
+      "title": "Add Shadcn/UI Textarea Component",
+      "file": "components/ui/textarea.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add textarea`. Verify the creation of `components/ui/textarea.tsx`."
+    },
+    {
+      "id": "017",
+      "filename": "task_017_add_shadcn_button.txt",
+      "title": "Add Shadcn/UI Button Component",
+      "file": "components/ui/button.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add button`. Verify the creation of `components/ui/button.tsx`."
+    },
+    {
+      "id": "018",
+      "filename": "task_018_add_shadcn_avatar.txt",
+      "title": "Add Shadcn/UI Avatar Component",
+      "file": "components/ui/avatar.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add avatar`. Verify the creation of `components/ui/avatar.tsx`."
+    },
+    {
+      "id": "019",
+      "filename": "task_019_add_shadcn_progress.txt",
+      "title": "Add Shadcn/UI Progress Component",
+      "file": "components/ui/progress.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add progress`. Verify the creation of `components/ui/progress.tsx`."
+    },
+    {
+      "id": "020",
+      "filename": "task_020_add_shadcn_alert.txt",
+      "title": "Add Shadcn/UI Alert Component",
+      "file": "components/ui/alert.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn-ui@latest add alert`. Verify the creation of `components/ui/alert.tsx`."
+    },
+    {
+      "id": "021",
+      "filename": "task_021_add_shadcn_toast.txt",
+      "title": "Add Shadcn/UI Toast Component",
+      "file": "components/ui/sonner.tsx",
+      "status": "complete",
+      "prompt": "Run `npx shadcn@latest add sonner`. The toast component is deprecated, so we used the recommended sonner alternative instead. Verify the creation of `components/ui/sonner.tsx`."
+    },
+    {
+      "id": "022",
+      "filename": "task_022_create_env_local.txt",
+      "title": "Create .env.local File",
+      "file": ".env.local",
+      "status": "complete",
+      "assigned_agent": "backend-developer",
+      "prompt": "Create the `.env.local` file in the project root. Add the line `GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE`. Replace the placeholder with your actual Google Gemini API key. **Ensure this file is listed in `.gitignore`.**"
+    },
+    {
+      "id": "023",
+      "filename": "task_023_create_env_example.txt",
+      "title": "Create .env.example File",
+      "file": ".env.example",
+      "status": "complete",
+      "assigned_agent": "backend-developer",
+      "prompt": "Create the `.env.example` file in the project root. Add the line `GEMINI_API_KEY=` to show required environment variables without exposing secrets."
+    },
+    {
+      "id": "024",
+      "filename": "task_024_verify_gitignore_env.txt",
+      "title": "Verify .gitignore for .env.local",
+      "file": ".gitignore",
+      "status": "complete",
+      "assigned_agent": "backend-developer",
+      "prompt": "Open the `.gitignore` file and verify that `.env.local` is listed to prevent committing secrets."
+    },
+    {
+      "id": "025",
+      "filename": "task_025_install_zustand.txt",
+      "title": "Install Zustand State Management Library",
+      "file": "package.json",
+      "status": "complete",
+      "prompt": "Run `npm install zustand` to add the state management library to the project dependencies."
+    },
+    {
+      "id": "026",
+      "filename": "task_026_create_core_directories.txt",
+      "title": "Create Core Project Directories",
+      "file": "./",
+      "status": "complete",
+      "prompt": "Manually create the following directories within the project structure as defined in the architecture diagram: `app/api/generate/[artifact]`, `app/api/package`, `components/chat`, `components/common`, `docs` (if not present), `docs/diagrams`, `hooks`, `templates`, `templates/cursor10x_system`, `types`."
+    },
+
+    // Phase 1: Core Chat Interface & State Management
+    {
+      "id": "027",
+      "filename": "task_027_create_chat_types_file.txt",
+      "title": "Create Chat Types File",
+      "file": "types/chat.ts",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Create the file `types/chat.ts`. Define and export the core TypeScript interfaces needed for the chat functionality as specified in the implementation guide: `Message` (with `id`, `sender`, `content`, `timestamp`), `UserAnswers` (with optional string fields for each answer: `projectName`, `projectOverview`, etc.), `ChatState` (defining the shape of the Zustand store, including arrays and status flags)."
+    },
+    {
+      "id": "028",
+      "filename": "task_028_create_types_index.txt",
+      "title": "Create Types Barrel File",
+      "file": "types/index.ts",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Create the file `types/index.ts`. Export all types defined in `types/chat.ts` using the syntax `export * from './chat';`. This allows for easier imports elsewhere."
+    },
+    {
+      "id": "029",
+      "filename": "task_029_create_constants_file.txt",
+      "title": "Create Constants File",
+      "file": "lib/constants.ts",
+      "status": "complete",
+      "assigned_agent": "full-stack-integrator",
+      "prompt": "Create the file `lib/constants.ts`. Define and export constants for the agent's messages. Include: `AGENT_INTRODUCTION_MESSAGE`, an array `AGENT_QUESTIONS` (each element being an object `{ key: keyof UserAnswers, question: string }`), `END_OF_QUESTIONS_MESSAGE`, and `INTERMISSION_MESSAGES` (an object mapping artifact names like 'blueprint' to the message shown after its completion)."
+    },
+    {
+      "id": "030",
+      "filename": "task_030_create_chat_state_hook_file.txt",
+      "title": "Create Chat State Hook File",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Create the file `hooks/useChatState.ts`. Import `create` from 'zustand', `ChatState`, `Message`, `UserAnswers` from '@/types', and constants from '@/lib/constants'."
+    },
+    {
+      "id": "031",
+      "filename": "task_031_init_zustand_store.txt",
+      "title": "Initialize Zustand Store Structure",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Inside `hooks/useChatState.ts`, define the `ChatState` interface incorporating all required state variables: `messages: Message[]`, `userAnswers: UserAnswers`, `currentQuestionIndex: number`, `isAgentProcessing: boolean`, `generatedArtifacts: Record<string, string>`, `statusMessage: string | null`, `isComplete: boolean`, `isPackaging: boolean`, `packageReady: boolean`. Define the basic Zustand store structure using `create<ChatState>((set, get) => ({ ...initial state... }))`."
+    },
+    {
+      "id": "032",
+      "filename": "task_032_implement_addmessage_action.txt",
+      "title": "Implement addMessage Action in Zustand Store",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Inside the Zustand store definition in `hooks/useChatState.ts`, implement the `addMessage` action. It should take a `message: Omit<Message, 'id' | 'timestamp'>` as input, generate a unique ID (e.g., using `Date.now().toString()`) and timestamp, and update the `messages` array in the state using `set((state) => ({ messages: [...state.messages, newMessage] }))`."
+    },
+    {
+      "id": "033",
+      "filename": "task_033_implement_answer_progress_action.txt",
+      "title": "Implement updateAnswerAndProgress Action",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Implement the `updateAnswerAndProgress` action in `hooks/useChatState.ts`. This action takes the user's `answer: string`. It should: 1. Get the current question key from `AGENT_QUESTIONS[currentQuestionIndex]`. 2. Update the `userAnswers` state with the new answer. 3. Add the user's message using `addMessage`. 4. Increment `currentQuestionIndex`. 5. Check if there's a next question; if yes, add the next agent question message using `addMessage`. 6. If no more questions, add the `END_OF_QUESTIONS_MESSAGE` and trigger the first AI generation step (placeholder for now)."
+    },
+    {
+      "id": "034",
+      "filename": "task_034_implement_processing_actions.txt",
+      "title": "Implement Processing Status Actions",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Implement actions `setProcessing(isProcessing: boolean, status?: string)` and `setPackaging(isPackaging: boolean, status?: string)` in `hooks/useChatState.ts`. These should update the `isAgentProcessing`, `isPackaging`, and `statusMessage` state variables accordingly using `set()`."
+    },
+    {
+      "id": "035",
+      "filename": "task_035_implement_artifact_actions.txt",
+      "title": "Implement Artifact Handling Actions",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Implement the `addArtifact(artifactName: string, content: string)` action in `hooks/useChatState.ts`. This should update the `generatedArtifacts` record in the state. Also add placeholders for `setPackageReady(isReady: boolean)` and `setComplete(isComplete: boolean)`."
+    },
+    {
+      "id": "036",
+      "filename": "task_036_export_chat_state_hook.txt",
+      "title": "Export useChatState Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Export the useChatState hook so it can be used by other components in the application"
+    },
+    {
+      "id": "037",
+      "filename": "task_037_create_messagebubble_component.txt",
+      "title": "Create MessageBubble Component Structure",
+      "file": "components/chat/MessageBubble.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `components/chat/MessageBubble.tsx`. Define the component function accepting `message: Message` prop. Import necessary Shadcn components (`Card`, `CardContent`, `Avatar` if used) and `Message` type. Set up basic JSX structure using Tailwind for styling, differentiating layout (e.g., `flex justify-end` for user, `flex justify-start` for agent)."
+    },
+    {
+      "id": "038",
+      "filename": "task_038_style_messagebubble_component.txt",
+      "title": "Style MessageBubble Component",
+      "file": "components/chat/MessageBubble.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "The styling was implemented as part of the initial component creation in Task 037",
+      "prompt": "Apply Tailwind classes within `components/chat/MessageBubble.tsx` to style the message bubbles. Use different background colors (e.g., `bg-primary text-primary-foreground` for user, `bg-muted` for agent), padding, margins, and rounded corners. Render the `message.content`. Add optional `Avatar` next to agent messages."
+    },
+    {
+      "id": "039",
+      "filename": "task_039_create_chatmessages_component.txt",
+      "title": "Create ChatMessages Component Structure",
+      "file": "components/chat/ChatMessages.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `components/chat/ChatMessages.tsx`. Define the component accepting `messages: Message[]` prop. Import `ScrollArea` from Shadcn and `MessageBubble`. Use `ScrollArea` as the main container. Map over the `messages` array inside the `ScrollArea` and render a `MessageBubble` for each, passing the message object and a unique key."
+    },
+    {
+      "id": "040",
+      "filename": "task_040_implement_chatmessages_autoscroll.txt",
+      "title": "Implement Auto-Scroll in ChatMessages",
+      "file": "components/chat/ChatMessages.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "In `components/chat/ChatMessages.tsx`, implement auto-scrolling to the bottom when new messages are added. Use `useRef` to get a reference to the scrollable container (or a specific bottom element). Use `useEffect` hook that triggers when the `messages` array changes; inside the effect, scroll the referenced element into view (e.g., `ref.current?.scrollIntoView({ behavior: 'smooth' })` or directly manipulate `scrollTop`)."
+    },
+    {
+      "id": "041",
+      "filename": "task_041_create_chatinput_component.txt",
+      "title": "Create ChatInput Component Structure",
+      "file": "components/chat/ChatInput.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `components/chat/ChatInput.tsx`. Define the component accepting `onSubmit: (input: string) => void` and `isDisabled: boolean` props. Import `Textarea`, `Button` from Shadcn. Set up the JSX with a `Textarea` and a `Button` (e.g., with a Send icon) wrapped in a container div."
+    },
+    {
+      "id": "042",
+      "filename": "task_042_implement_chatinput_state_handling.txt",
+      "title": "Implement State and Submission Handling in ChatInput",
+      "file": "components/chat/ChatInput.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "In `components/chat/ChatInput.tsx`, use `useState` to manage the textarea's value. Implement an `onKeyDown` handler for the `Textarea` to detect Enter key presses (checking for `event.key === 'Enter'` and `!event.shiftKey`) to trigger submission. Implement an `onClick` handler for the `Button` to trigger submission. Both handlers should call `onSubmit(inputValue)` if the input is not empty and `isDisabled` is false, then clear the input state. Pass the `isDisabled` prop to disable the `Textarea` and `Button`."
+    },
+    {
+      "id": "043",
+      "filename": "task_043_create_loadingindicator_component.txt",
+      "title": "Create LoadingIndicator Component",
+      "file": "components/chat/LoadingIndicator.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `components/chat/LoadingIndicator.tsx`. Define the component accepting `statusMessage: string | null` prop. If `statusMessage` is not null, render a container (e.g., styled `div` or `Alert`) displaying the message and the Shadcn `Progress` component (use `value={undefined}` for indeterminate state) or a custom spinner animation."
+    },
+    {
+      "id": "044",
+      "filename": "task_044_create_chatwindow_component.txt",
+      "title": "Create ChatWindow Component Structure",
+      "file": "components/chat/ChatWindow.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `components/chat/ChatWindow.tsx`. Define the component accepting props like `messages: Message[]`, `isProcessing: boolean`, `statusMessage: string | null`, `onSubmit: (input: string) => void`. Import `ChatMessages`, `ChatInput`, `LoadingIndicator`. Arrange these components within a main container (e.g., Shadcn `Card` with `CardHeader`, `CardContent`, `CardFooter`). Place `ChatMessages` in `CardContent`, `ChatInput` in `CardFooter`, and conditionally render `LoadingIndicator` perhaps below `ChatMessages` or near the input."
+    },
+    {
+      "id": "045",
+      "filename": "task_045_integrate_state_chatwindow.txt",
+      "title": "Integrate State Hook with ChatWindow Props",
+      "file": "components/chat/ChatWindow.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "This task was implemented as part of the ChatWindow component creation in Task 044.",
+      "prompt": "Connect the props received by `ChatWindow` to the child components. Pass `messages` to `ChatMessages`. Pass `isProcessing` (or a combined boolean like `isProcessing || isPackaging`) to `ChatInput` as the `isDisabled` prop. Pass `statusMessage` to `LoadingIndicator`. Pass the `onSubmit` prop to `ChatInput`."
+    },
+    {
+      "id": "046",
+      "filename": "task_046_create_main_route_group.txt",
+      "title": "Create Main Route Group Directory",
+      "file": "app/(main)/",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create a directory named `(main)` inside the `app/` directory. This route group allows applying a specific layout without affecting the URL path."
+    },
+    {
+      "id": "047",
+      "filename": "task_047_create_main_layout.txt",
+      "title": "Create Main Layout File",
+      "file": "app/(main)/layout.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Create `app/(main)/layout.tsx`. Define a basic React component that accepts `{ children }: { children: React.ReactNode }` and renders `{children}`. This layout file applies specifically to routes within the `(main)` group. Add minimal styling if needed (e.g., centering content)."
+    },
+    {
+      "id": "048",
+      "filename": "task_048_move_initial_page.txt",
+      "title": "Move Initial Page to Main Route Group",
+      "file": "app/(main)/page.tsx",
+      "status": "complete",
+      "agent": "frontend-developer",
+      "ready": true,
+      "notes": "",
+      "prompt": "Move the initial `app/page.tsx` file into the `app/(main)/` directory, renaming it if necessary to `app/(main)/page.tsx`. Remove the original `app/page.tsx`."
+    },
+    {
+      "id": "049",
+      "filename": "task_049_implement_main_page_structure.txt",
+      "title": "Implement Main Page Structure",
+      "file": "app/(main)/page.tsx",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Modify `app/(main)/page.tsx`. Make it a client component (`'use client';`). Import `React`, `useEffect`, `useChatState` hook, and `ChatWindow` component. Define the main page component function."
+    },
+    {
+      "id": "050",
+      "filename": "task_050_implement_main_page_state_integration.txt",
+      "title": "Integrate State Hook in Main Page",
+      "file": "app/(main)/page.tsx",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Inside the main page component in `app/(main)/page.tsx`, call `useChatState()` to get access to the store's state and actions. Destructure the needed values (e.g., `messages`, `isAgentProcessing`, `statusMessage`, `updateAnswerAndProgress`, `addMessage`)."
+    },
+    {
+      "id": "051",
+      "filename": "task_051_implement_main_page_initial_message.txt",
+      "title": "Dispatch Initial Message in Main Page",
+      "file": "app/(main)/page.tsx",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "In `app/(main)/page.tsx`, add a `useEffect` hook. Inside the effect, check if `messages.length` is 0. If it is, call the `addMessage` action with the `AGENT_INTRODUCTION_MESSAGE` from `constants.ts` (sender: 'agent'). Ensure the dependency array is correct (e.g., `[messages.length, addMessage]`)."
+    },
+    {
+      "id": "052",
+      "filename": "task_052_implement_main_page_render.txt",
+      "title": "Render ChatWindow in Main Page",
+      "file": "app/(main)/page.tsx",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "In the return statement of `app/(main)/page.tsx`, render the `ChatWindow` component. Pass the required props obtained from the `useChatState` hook: `messages`, `isProcessing` (use `isAgentProcessing`), `statusMessage`, and `onSubmit` (pass the `updateAnswerAndProgress` action)."
+    },
+    {
+      "id": "053",
+      "filename": "task_053_implement_root_layout.txt",
+      "title": "Implement Root Layout Structure",
+      "file": "app/layout.tsx",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Refine the root layout `app/layout.tsx`. Ensure it imports `globals.css`. Set up the `<html>` and `<body>` tags correctly. Apply base Tailwind classes to the body (e.g., `bg-background text-foreground`). Render `{children}` within the body. Import and render the Shadcn `<Toaster />` component inside the body to enable toast notifications."
+    },
+
+    // Phase 2: AI Integration & Blueprint Generation
+    {
+      "id": "054",
+      "filename": "task_054_define_api_types.txt",
+      "title": "Define API Request/Response Types",
+      "file": "types/api.ts",
+      "status": "complete",
+      "assigned_agent": "backend-developer",
+      "prompt": "Create `types/api.ts`. Define and export interfaces: `GenerateRequestBody` (containing `userAnswers: UserAnswers`, optionally `previousContext?: Record<string, string>`), `PackageRequestBody` (containing `artifacts: Record<string, string>`, `projectName: string`), and potentially a generic `ErrorResponse` type (`{ error: string }`). Add `export * from './api';` to `types/index.ts`."
+    },
+    {
+      "id": "055",
+      "filename": "task_055_install_google_ai_sdk.txt",
+      "title": "Install Google Generative AI SDK",
+      "file": "package.json",
+      "status": "complete",
+      "assigned_agent": "backend-developer",
+      "prompt": "Run `npm install @google/generative-ai` to install the official SDK for interacting with the Gemini API."
+    },
+    {
+      "id": "056",
+      "filename": "task_056_create_generate_api_route_file.txt",
+      "title": "Create Generate Artifact API Route File Structure",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "assignedTo": "backend-developer",
+      "path": "app/api/generate/[artifact]/route.ts",
+      "prompt": "Create the initial file structure for the Generate Artifact API Route. This should include imports for NextRequest/NextResponse, the Google Generative AI SDK, and proper types. The API should handle validation of the incoming request body and route parameters. Implement the basic structure with error handling, but leave the actual implementation for subsequent tasks."
+    },
+    {
+      "id": "057",
+      "filename": "task_057_implement_generate_api_post_handler.txt",
+      "title": "Implement POST Handler in Generate API Route",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "assignedTo": "backend-developer",
+      "prompt": "Define and export an async function `POST(request: NextRequest, { params }: { params: { artifact: string } })`. Inside the function, add initial logic to parse the request body as JSON (`await request.json()`) into a `GenerateRequestBody` type. Extract the `artifact` from `params`. Add basic validation/error handling if the body is missing or the artifact name is invalid."
+    },
+    {
+      "id": "058",
+      "filename": "task_058_implement_generate_api_key_gemini_init.txt",
+      "title": "Implement API Key Handling and Gemini Initialization",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "prompt": "Inside the `POST` handler in `app/api/generate/[artifact]/route.ts`: 1. Retrieve the API key using `process.env.GEMINI_API_KEY`. Check if the key exists; return an error response if not. 2. Initialize the GoogleGenerativeAI client: `const genAI = new GoogleGenerativeAI(apiKey);`. 3. Select the model: `const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });` (or specified model)."
+    },
+    {
+      "id": "059",
+      "filename": "task_059_implement_generate_api_prompt_logic.txt",
+      "title": "Implement Prompt Selection Logic in Generate API Route",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "prompt": "Inside the `POST` handler, import the prompt generation functions from `lib/prompts.ts`. Use a `switch` statement or `if/else if` block based on the `params.artifact` value ('blueprint', 'architecture', etc.). Call the corresponding prompt function, passing the `userAnswers` and `previousContext` from the request body. Store the generated prompt string in a variable. Handle default/invalid artifact cases."
+    },
+    {
+      "id": "060",
+      "filename": "task_060_implement_generate_api_gemini_call.txt",
+      "title": "Implement Gemini API Stream Call",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "prompt": "Inside the `POST` handler, after getting the prompt: 1. Call the Gemini model to generate content as a stream: `const result = await model.generateContentStream(prompt);`. 2. Wrap the API call in a `try...catch` block to handle potential errors from the Gemini API (e.g., rate limits, safety blocks). Return an appropriate error `NextResponse` in the catch block."
+    },
+    {
+      "id": "061",
+      "filename": "task_061_implement_generate_api_stream_response.txt",
+      "title": "Implement Streaming Response Handling",
+      "file": "app/api/generate/[artifact]/route.ts",
+      "status": "complete",
+      "prompt": "Inside the `POST` handler's `try` block, after `generateContentStream`: 1. Create a `ReadableStream` using the `result.stream`. Use the Vercel AI SDK's `StreamingTextResponse` or manually create a transform stream if needed to ensure proper UTF-8 encoding and format. Example using AI SDK: `return new StreamingTextResponse(result.stream);`. If manual: Create a `TransformStream`, pipe `result.stream` through `stream.readable.pipeThrough(transformStream)`, return `new Response(transformStream.readable, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });`."
+    },
+    {
+      "id": "062",
+      "filename": "task_062_create_prompts_file.txt",
+      "title": "Create Prompts Utility File",
+      "file": "lib/prompts.ts",
+      "status": "complete",
+      "assignedTo": "backend-developer",
+      "prompt": "Create the file `lib/prompts.ts`. Import `UserAnswers` type."
+    },
+    {
+      "id": "063",
+      "filename": "task_063_implement_blueprint_prompt.txt",
+      "title": "Implement generateBlueprintPrompt Function",
+      "file": "lib/prompts.ts",
+      "status": "complete",
+      "prompt": "Implement and export `generateBlueprintPrompt(answers: UserAnswers): string`. This function should construct a detailed prompt string for the Gemini API. Incorporate `answers.projectName`, `answers.projectOverview`, `answers.coreFeatures`, `answers.uiUx`, and `answers.techArchitecture`. Instruct the AI to generate a comprehensive Technical Blueprint in Markdown format, following the structure defined in the project's main blueprint (Executive Summary, Requirements, Architecture, Roadmap, UX, Validation, Risks, Config Mgmt, Tools, Security)."
+    },
+    {
+      "id": "064",
+      "filename": "task_064_create_apiclient_file.txt",
+      "title": "Create API Client Utility File",
+      "file": "lib/apiClient.ts",
+      "status": "complete",
+      "prompt": "Create the file `lib/apiClient.ts`. Import necessary types like `GenerateRequestBody`, `PackageRequestBody`."
+    },
+    {
+      "id": "065",
+      "filename": "task_065_implement_fetch_artifact_client.txt",
+      "title": "Implement fetchGeneratedArtifact Client Function",
+      "file": "lib/apiClient.ts",
+      "status": "complete",
+      "assignedTo": "backend-developer",
+      "prompt": "Implement and export an async function `fetchGeneratedArtifact(artifact: string, payload: GenerateRequestBody): Promise<Response>`. This function should use the `fetch` API to make a `POST` request to `/api/generate/${artifact}`. Set the `method`, `headers: { 'Content-Type': 'application/json' }`, and `body: JSON.stringify(payload)`. Include basic error handling (e.g., check `response.ok`). Return the raw `Response` object."
+    },
+    {
+      "id": "066",
+      "filename": "task_066_integrate_blueprint_api_call.txt",
+      "title": "Integrate Blueprint API Call into State Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "assignedTo": "frontend-developer",
+      "prompt": "Modify the `updateAnswerAndProgress` action in `hooks/useChatState.ts`. After the last question is answered: 1. Call `setProcessing(true, 'Generating Technical Blueprint...')`. 2. Call `apiClient.fetchGeneratedArtifact('blueprint', { userAnswers: get().userAnswers })`. 3. Add `.then()` and `.catch()` to handle the promise returned by fetch. In `.catch()`, handle the error (e.g., `setProcessing(false)`, add error message). The `.then()` block will be expanded in the next task."
+    },
+    {
+      "id": "067",
+      "filename": "task_067_create_artifactviewer_component.txt",
+      "title": "Create ArtifactViewer Component Structure",
+      "file": "components/chat/ArtifactViewer.tsx",
+      "status": "complete",
+      "assignedTo": "frontend-developer",
+      "prompt": "Create `components/chat/ArtifactViewer.tsx`. Define the component accepting `stream: ReadableStream` and `onComplete: (content: string) => void` props. Import `React`, `useState`, `useEffect`. Set up state for the accumulating content: `const [content, setContent] = useState('');`. Add basic JSX to render the `content` state, perhaps wrapped in a styled container."
+    },
+    {
+      "id": "068",
+      "filename": "task_068_implement_artifactviewer_stream_reading.txt",
+      "title": "Implement ArtifactViewer Stream Reading Functionality",
+      "file": "components/chat/ArtifactViewer.tsx",
+      "status": "complete",
+      "assigned": "frontend-developer",
+      "prompt": "Update the ArtifactViewer component to read from the ReadableStream and display the content. Add a useEffect hook that gets the reader from the stream using `stream.getReader()`. Implement a while loop that reads chunks with `await reader.read()` and use TextDecoder to decode each chunk. Accumulate the text and update the state. When the stream is done, call the onComplete callback with the final content. Handle errors and cleanup the reader when the component unmounts."
+    },
+    {
+      "id": "069",
+      "filename": "task_069_implement_artifactviewer_markdown.txt",
+      "title": "Add Markdown Rendering to ArtifactViewer",
+      "file": "components/chat/ArtifactViewer.tsx",
+      "status": "complete",
+      "assigned": "frontend-developer",
+      "prompt": "Install `react-markdown` and `remark-gfm`: `npm install react-markdown remark-gfm`. Import `ReactMarkdown` and `remarkGfm`. In `components/chat/ArtifactViewer.tsx`, wrap the displayed `content` state with `<ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>`. Style the rendered Markdown elements (headings, lists, code blocks) using Tailwind within `styles/globals.css` or via component props if the library supports it."
+    },
+    {
+      "id": "070",
+      "filename": "task_070_handle_stream_display_state.txt",
+      "title": "Handle Stream Display in State Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "assigned_agent": "frontend-developer",
+      "prompt": "Modify the `.then(response => ...)` block from task 066 in `hooks/useChatState.ts`. If `response.ok` and `response.body` exists: 1. Define an `onComplete` callback function that takes the final content string, calls `addArtifact('blueprint', finalContent)`, sets processing to false (`setProcessing(false)`), adds the intermission message for the next step, and triggers the next artifact generation (placeholder). 2. Add a new agent message to the state. Its content should be the `<ArtifactViewer stream={response.body} onComplete={onCompleteCallback} />` component."
+    },
+    {
+      "id": "071",
+      "filename": "task_071_add_toast_notifications.txt",
+      "title": "Add Toast Notifications for Status",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Import `toast` from `sonner` (or the Shadcn toast hook). In `hooks/useChatState.ts`, call `toast()` or `toast.promise()` to show user feedback for actions like starting generation, errors, and completion of major steps. Use the `Toaster` component added in the root layout."
+    },
+
+    // Phase 3: Generation of Remaining Artifacts
+    {
+      "id": "072",
+      "filename": "task_072_implement_architecture_prompt.txt",
+      "title": "Implement generateArchitecturePrompt Function",
+      "file": "lib/prompts.ts",
+      "status": "complete",
+      "prompt": "Implement and export `generateArchitecturePrompt(answers: UserAnswers, blueprint: string): string`. Construct a detailed prompt asking the AI to generate a file/folder architecture (as a textual representation, e.g., Markdown code block with tree structure) based on the provided `answers` and the previously generated `blueprint` context. Specify the desired level of detail."
+    },
+    {
+      "id": "073",
+      "filename": "task_073_implement_guide_prompt.txt",
+      "title": "Implement generateGuidePrompt Function",
+      "file": "lib/prompts.ts",
+      "status": "complete",
+      "prompt": "Implement and export `generateGuidePrompt(answers: UserAnswers, architecture: string): string`. Construct a detailed prompt asking the AI to generate an implementation guide in Markdown. Instruct it to use the provided `architecture` context and `answers` to break down the project setup and file creation process step-by-step, explaining the purpose of key files/folders."
+    },
+    {
+      "id": "074",
+      "filename": "task_074_implement_tasks_prompt.txt",
+      "title": "Implement generateTasksPrompt Function",
+      "file": "lib/prompts.ts",
+      "status": "complete",
+      "prompt": "Implement and export `generateTasksPrompt(answers: UserAnswers, guide: string): string`. Construct a detailed prompt asking the AI to generate a list of development tasks based on the `implementation guide`. **Crucially, instruct the AI to format the output as a JSON array string, where each object in the array strictly follows the structure:** `{ \"id\": \"string\", \"filename\": \"string (task_NNN_description.txt)\", \"title\": \"string\", \"file\": \"string (path/to/relevant/file.ext)\", \"status\": \"pending\", \"prompt\": \"string (Detailed instructions for the task)\" }`. Ensure the AI generates unique IDs and filenames, and detailed prompts for each task."
+    },
+    {
+      "id": "075",
+      "filename": "task_075_integrate_architecture_api_call.txt",
+      "title": "Integrate Architecture API Call into State Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Modify the `onComplete` callback for the blueprint generation in `hooks/useChatState.ts`. After storing the blueprint artifact and adding the intermission message: 1. Call `setProcessing(true, 'Generating File/Folder Architecture...')`. 2. Call `apiClient.fetchGeneratedArtifact('architecture', { userAnswers: get().userAnswers, previousContext: { technicalBlueprint: blueprintContent } })`. 3. Add `.then()`/`.catch()` handling similar to the blueprint step, setting up the `ArtifactViewer` for the architecture stream and defining its own `onComplete` callback to trigger the *next* step (guide generation)."
+    },
+    {
+      "id": "076",
+      "filename": "task_076_integrate_guide_api_call.txt",
+      "title": "Integrate Implementation Guide API Call into State Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Modify the `onComplete` callback for the architecture generation. After storing the architecture artifact and adding the intermission message: 1. Call `setProcessing(true, 'Generating Implementation Guide...')`. 2. Call `apiClient.fetchGeneratedArtifact('guide', { userAnswers: get().userAnswers, previousContext: { fileArchitecture: architectureContent } })`. 3. Add `.then()`/`.catch()` handling, setting up the `ArtifactViewer` for the guide stream and defining its `onComplete` callback to trigger task generation."
+    },
+    {
+      "id": "077",
+      "filename": "task_077_integrate_tasks_api_call.txt",
+      "title": "Integrate Tasks API Call into State Hook",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Modify the `onComplete` callback for the guide generation. After storing the guide artifact and adding the intermission message: 1. Call `setProcessing(true, 'Generating Tasks...')`. 2. Call `apiClient.fetchGeneratedArtifact('tasks', { userAnswers: get().userAnswers, previousContext: { implementationGuide: guideContent } })`. 3. Add `.then()`/`.catch()` handling, setting up the `ArtifactViewer` for the tasks stream (expecting JSON string), and defining its `onComplete` callback."
+    },
+    {
+      "id": "078",
+      "filename": "task_078_handle_final_artifact_completion.txt",
+      "title": "Handle Final Artifact Completion",
+      "file": "hooks/useChatState.ts",
+      "status": "complete",
+      "prompt": "Modify the `onComplete` callback for the *tasks* generation. After storing the raw tasks artifact (JSON string): 1. Call `setProcessing(false)`. 2. Set the overall completion status: `setComplete(true)`. 3. Add a final agent message indicating all artifacts are generated and packaging is ready (e.g., 'All artifacts generated! Preparing your download...'). 4. Set `setPackageReady(true)` - this will enable the download button."
+    },
+
+    // Phase 4: Packaging & Download
+    {
+      "id": "079",
+      "filename": "task_079_add_template_files.txt",
+      "title": "Add Static Cursor10x Template Files",
+      "file": "templates/cursor10x/",
+      "status": "complete",
+      "prompt": "Review and understand the template files in `templates/cursor10x/`. This directory contains the system template for generating the project package. The structure includes `.cursor/` (system files), `docs/` (for generated content), and `tasks/` (for generated tasks). The `.gitignore` file must be preserved as-is. The generated content will be placed into the existing empty files: generated architecture will go into `docs/architecture.md`, generated blueprint into `docs/blueprint.md`, implementation guide into `docs/guide.md`, and tasks into `tasks/tasks.json`. This structure will be packaged into a downloadable zip file. Note: The `.cursor` directory should not be modified and will be exported as-is."
+    },
+    {
+      "id": "080",
+      "filename": "task_080_install_jszip.txt",
+      "title": "Install JSZip Library",
+      "file": "package.json",
+      "status": "complete",
+      "prompt": "Run `npm install jszip @types/jszip` to add the zip creation library."
+    },
+    {
+      "id": "081",
+      "filename": "task_081_create_package_api_route_file.txt",
+      "title": "Create Package API Route File Structure",
+      "file": "app/api/package/route.ts",
+      "status": "complete",
+      "prompt": "Create the file `app/api/package/route.ts`. Import `NextRequest`, `NextResponse`, `JSZip`, Node.js `fs/promises` and `path`, and `PackageRequestBody` type."
+    },
+    {
+      "id": "082",
+      "filename": "task_082_implement_package_api_post_handler.txt",
+      "title": "Implement POST Handler in Package API Route",
+      "file": "app/api/package/route.ts",
+      "status": "pending",
+      "prompt": "Define and export `async function POST(request: NextRequest)`. Parse the JSON body `await request.json()` into `PackageRequestBody`. Handle potential parsing errors."
+    },
+    {
+      "id": "083",
+      "filename": "task_083_implement_package_api_zip_init.txt",
+      "title": "Initialize JSZip and Add Artifacts",
+      "file": "app/api/package/route.ts",
+      "status": "pending",
+      "prompt": "Inside the `POST` handler: 1. Initialize JSZip: `const zip = new JSZip();`. 2. Get the `artifacts` and `projectName` from the request body. 3. Create the main folder for the project within the zip: `const projectFolder = zip.folder(projectName || 'cursor10x');`. 4. Add the template structure by creating a template folder: `const templateFolder = projectFolder.folder('cursor10x');`. 5. Create the necessary subdirectories: `const docsFolder = templateFolder.folder('docs');` and `const tasksFolder = templateFolder.folder('tasks');`. 6. Add each generated artifact to the specific empty files: `docsFolder.file('blueprint.md', artifacts.blueprint || '');`, `docsFolder.file('architecture.md', artifacts.architecture || '');`, `docsFolder.file('guide.md', artifacts.guide || '');`, `tasksFolder.file('tasks.json', artifacts.tasks || '[]');`. Ensure all artifact keys match the keys in the `generatedArtifacts` state object."
+    },
+    {
+      "id": "084",
+      "filename": "task_084_implement_package_api_template_reading.txt",
+      "title": "Implement Template Directory Reading Logic",
+      "file": "app/api/package/route.ts",
+      "status": "pending",
+      "prompt": "Inside the `POST` handler: 1. Define the absolute path to the template directory: `const templateDir = path.resolve(process.cwd(), 'templates', 'cursor10x');`. 2. Create an async recursive function `addFilesToZip(directoryPath, currentZipFolder)` that takes a directory path and a JSZip folder object. 3. Inside this function, use `fs.readdir` to list directory contents. For each item, use `fs.stat` to check if it's a file or directory. If a file, check if it's one of the placeholder files to skip (except `.gitignore` which should be preserved as-is): `docs/blueprint.md`, `docs/architecture.md`, `docs/guide.md`, or `tasks/tasks.json`. If it's not one of these files, read it using `fs.readFile` and add it to `currentZipFolder.file()`. If it's `.gitignore`, preserve it as-is. If it's a directory, create a new zip folder using `currentZipFolder.folder()` and recursively call `addFilesToZip` for the subdirectory."
+    },
+    {
+      "id": "085",
+      "filename": "task_085_implement_package_api_add_templates.txt",
+      "title": "Add Template Files to Zip",
+      "file": "app/api/package/route.ts",
+      "status": "pending",
+      "prompt": "Inside the `POST` handler: 1. Create the main folder for the template within the zip: `const templateZipFolder = projectFolder.folder('cursor10x');`. 2. Call the recursive function created previously: `await addFilesToZip(templateDir, templateZipFolder);`. 3. After the template files are added, make sure to add the generated content to the specific files as in task 083. Wrap this in error handling with appropriate try/catch blocks and logging."
+    },
+    {
+      "id": "086",
+      "filename": "task_086_implement_package_api_generate_response.txt",
+      "title": "Generate Zip Buffer and Return Response",
+      "file": "app/api/package/route.ts",
+      "status": "pending",
+      "prompt": "Inside the `POST` handler, after adding all files: 1. Generate the zip content: `const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });`. 2. Create the filename: `const filename = `${projectName || 'project'}_cursor10x.zip`;`. 3. Return a `NextResponse` with the buffer, status 200, and appropriate headers: `headers: { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename=\"${filename}\"` }`. Add `try...catch` around the entire zip generation process."
+    },
+    {
+      "id": "087",
+      "filename": "task_087_implement_fetch_package_client.txt",
+      "title": "Implement fetchPackage Client Function",
+      "file": "lib/apiClient.ts",
+      "status": "pending",
+      "prompt": "Implement and export `async function fetchPackage(payload: PackageRequestBody): Promise<Response>`. Use `fetch` to make a `POST` request to `/api/package`, sending the `payload` as JSON body. Return the raw `Response` object."
+    },
+    {
+      "id": "088",
+      "filename": "task_088_create_downloadbutton_component.txt",
+      "title": "Create DownloadButton Component Structure",
+      "file": "components/common/DownloadButton.tsx",
+      "status": "pending",
+      "prompt": "Create `components/common/DownloadButton.tsx`. Define the component accepting props: `onClick: () => Promise<void>`, `isReady: boolean`, `projectName: string`. Import `useState`, `Button`. Add state `const [isDownloading, setIsDownloading] = useState(false);`. Render a Shadcn `Button`."
+    },
+    {
+      "id": "089",
+      "filename": "task_089_implement_downloadbutton_logic.txt",
+      "title": "Implement DownloadButton Logic and Styling",
+      "file": "components/common/DownloadButton.tsx",
+      "status": "pending",
+      "prompt": "In `components/common/DownloadButton.tsx`: 1. Disable the button if `!isReady` or `isDownloading`. 2. Show loading text/spinner inside the button if `isDownloading`. 3. Implement an async `handleClick` function that sets `isDownloading` true, calls `await props.onClick()`, handles errors (e.g., show toast), and finally sets `isDownloading` false. Attach `handleClick` to the button's `onClick`. Set button text (e.g., 'Download Project Package')."
+    },
+    {
+      "id": "090",
+      "filename": "task_090_integrate_downloadbutton_page.txt",
+      "title": "Integrate DownloadButton into Main Page",
+      "file": "app/(main)/page.tsx",
+      "status": "pending",
+      "prompt": "In `app/(main)/page.tsx`: 1. Import `DownloadButton`. 2. Conditionally render `<DownloadButton />` only when `isComplete` state from `useChatState` is true. 3. Pass the necessary props: `isReady={packageReady}`, `projectName={userAnswers.projectName || 'project'}`, and the `handleDownload` function (to be created next) as `onClick`."
+    },
+    {
+      "id": "091",
+      "filename": "task_091_implement_download_handler.txt",
+      "title": "Implement Download Handler Function on Page",
+      "file": "app/(main)/page.tsx",
+      "status": "pending",
+      "prompt": "In `app/(main)/page.tsx`, create an `async function handleDownload()`. Inside it: 1. Get `generatedArtifacts` and `userAnswers.projectName` from the state hook. 2. Call `apiClient.fetchPackage({ artifacts: generatedArtifacts, projectName: userAnswers.projectName || 'project' })`. 3. Check if `response.ok`. If not, handle error (show toast). 4. Get the blob: `const blob = await response.blob();`. 5. Create object URL: `const url = URL.createObjectURL(blob);`. 6. Create `<a>` link, set `href=url`, `download=filename`. 7. Click link: `link.click();`. 8. Revoke URL: `URL.revokeObjectURL(url);`. 9. Wrap in `try...catch` and show toasts for success/error. Pass this function to the `DownloadButton`'s `onClick` prop."
+    },
+
+    // Phase 5: Testing & Refinement (Tasks represent setting up and writing tests)
+    {
+      "id": "092",
+      "filename": "task_092_setup_jest.txt",
+      "title": "Setup Jest and Testing Library",
+      "file": "jest.config.js",
+      "status": "pending",
+      "prompt": "Install Jest, React Testing Library, and necessary dependencies: `npm install --save-dev jest @types/jest ts-jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom`. Create `jest.config.js` and configure it for Next.js/TypeScript project (use Next.js official Jest example configuration)."
+    },
+    {
+      "id": "093",
+      "filename": "task_093_test_utils.txt",
+      "title": "Write Unit Tests for Utility Functions",
+      "file": "lib/",
+      "status": "pending",
+      "prompt": "Create `*.test.ts` files for utility functions in `lib/` (e.g., `utils.test.ts`, `prompts.test.ts`). Write unit tests to verify their logic. For `prompts.ts`, check if the generated prompts contain expected keywords based on dummy input."
+    },
+    {
+      "id": "094",
+      "filename": "task_094_test_components.txt",
+      "title": "Write Unit Tests for Core Components",
+      "file": "components/",
+      "status": "pending",
+      "prompt": "Create `*.test.tsx` files for essential components (e.g., `MessageBubble.test.tsx`, `ChatInput.test.tsx`). Use React Testing Library to render components with mock props, simulate user interactions (typing, clicking), and assert correct rendering and event handling."
+    },
+    {
+      "id": "095",
+      "filename": "task_095_test_state_hook.txt",
+      "title": "Write Tests for State Hook",
+      "file": "hooks/useChatState.test.ts",
+      "status": "pending",
+      "prompt": "Create `hooks/useChatState.test.ts`. Test the Zustand store's actions and state transitions. Use Testing Library's `renderHook` and `act`. Mock API client functions (`apiClient.ts`) using `jest.mock` to simulate successful and failed API calls during state transitions."
+    },
+    {
+      "id": "096",
+      "filename": "task_096_setup_e2e_testing.txt",
+      "title": "Setup E2E Testing Framework (Cypress/Playwright)",
+      "file": "./",
+      "status": "pending",
+      "prompt": "Choose and install an E2E testing framework (e.g., `npm install --save-dev cypress`). Follow its initialization instructions (e.g., `npx cypress open`). Configure base URL and other settings."
+    },
+    {
+      "id": "097",
+      "filename": "task_097_write_e2e_main_flow.txt",
+      "title": "Write E2E Test for Main Conversation Flow",
+      "file": "cypress/e2e/",
+      "status": "pending",
+      "prompt": "Create an E2E test spec (e.g., `chat_flow.cy.ts`). Write commands to: visit the main page, type answers into the input for each question, submit, verify agent responses appear, and check that the final 'complete' state is reached and the download button appears. Use intercepts (`cy.intercept`) to mock API responses for `/api/generate/*` and `/api/package` to make the test reliable and fast."
+    },
+    {
+      "id": "098",
+      "filename": "task_098_manual_testing_refinement.txt",
+      "title": "Perform Manual Testing and Refinement",
+      "file": "./",
+      "status": "pending",
+      "prompt": "Conduct thorough manual testing across multiple browsers (Chrome, Firefox, Safari, Edge). Input varied project details to test AI output quality. Test error conditions (e.g., provide invalid API key temporarily, disconnect network). Verify UI/UX is intuitive. Based on results, refine prompts in `lib/prompts.ts`, adjust UI/styles, and fix any bugs found."
+    },
+    {
+      "id": "099",
+      "filename": "task_099_finalize_readme.txt",
+      "title": "Finalize README Documentation",
+      "file": "README.md",
+      "status": "pending",
+      "prompt": "Update `README.md` with final details: installation steps (`npm install`), how to set up environment variables (`.env.local`), how to run the development server (`npm run dev`), build (`npm run build`), and test (`npm run test`). Add sections on architecture overview and usage."
+    },
+    {
+      "id": "100",
+      "filename": "task_100_create_architecture_doc.txt",
+      "title": "Create ARCHITECTURE.md Documentation",
+      "file": "docs/ARCHITECTURE.md",
+      "status": "pending",
+      "prompt": "Create `docs/ARCHITECTURE.md`. Copy or summarize the key sections from the original technical blueprint document generated earlier (Executive Summary, Requirements Analysis, Solution Architecture, Tech Stack, etc.) into this file for project documentation."
+    },
+
+    // Phase 6: Deployment & CI/CD
+    {
+      "id": "101",
+      "filename": "task_101_configure_vercel_env.txt",
+      "title": "Configure Vercel Environment Variables",
+      "file": "./",
+      "status": "pending",
+      "prompt": "Log in to Vercel. Connect the Git repository to a new Vercel project. Navigate to the project settings -> Environment Variables. Add the `GEMINI_API_KEY` with its production value. Ensure it's configured for Production, Preview, and Development environments as needed."
+    },
+    {
+      "id": "102",
+      "filename": "task_102_verify_production_build.txt",
+      "title": "Verify Production Build",
+      "file": "./",
+      "status": "pending",
+      "prompt": "Run `npm run build` locally. Ensure the build completes without errors. Investigate and fix any build failures related to types, dependencies, or configuration."
+    },
+    {
+      "id": "103",
+      "filename": "task_103_create_cicd_workflow_file.txt",
+      "title": "Create CI/CD Workflow File (GitHub Actions)",
+      "file": ".github/workflows/deploy.yml",
+      "status": "pending",
+      "prompt": "Create the directory `.github/workflows/` if it doesn't exist. Create `deploy.yml` inside it. Define the workflow trigger (e.g., `on: push: branches: [ main ]`)."
+    },
+    {
+      "id": "104",
+      "filename": "task_104_implement_cicd_job_setup.txt",
+      "title": "Implement CI/CD Job Setup Steps",
+      "file": ".github/workflows/deploy.yml",
+      "status": "pending",
+      "prompt": "In `deploy.yml`, define a job (e.g., `deploy`). Specify `runs-on: ubuntu-latest`. Add initial steps: `actions/checkout@v3`, `actions/setup-node@v3` (specify Node.js version, e.g., 18 or 20), and a step to install dependencies using caching: `npm ci`."
+    },
+    {
+      "id": "105",
+      "filename": "task_105_implement_cicd_lint_test_build.txt",
+      "title": "Implement CI/CD Lint, Test, Build Steps",
+      "file": ".github/workflows/deploy.yml",
+      "status": "pending",
+      "prompt": "Add steps to the CI/CD job in `deploy.yml` after dependency installation: Run linting (`run: npm run lint`), run tests (`run: npm run test`), and run the production build (`run: npm run build`). Ensure the workflow fails if any of these steps fail."
+    },
+    {
+      "id": "106",
+      "filename": "task_106_implement_cicd_vercel_deploy.txt",
+      "title": "Implement CI/CD Vercel Deployment Step",
+      "file": ".github/workflows/deploy.yml",
+      "status": "pending",
+      "prompt": "Add the final step to the CI/CD job in `deploy.yml` to deploy to Vercel. Use the official Vercel GitHub Action (`vercel/vercel-action@v1`) or Vercel CLI. Configure it with necessary secrets (`VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_TOKEN` stored in GitHub secrets) and set the `--prod` flag for deployments triggered by the main branch."
+    }
+  ],
+  "metadata": {
+    "totalTasks": 106,
+    "pendingTasks": 29,
+    "completedTasks": 77,
+    "skippedTasks": 3,
+    "lastUpdated": "2024-04-09T10:35:00Z"
+  }
+}

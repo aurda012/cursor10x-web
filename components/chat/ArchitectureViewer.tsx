@@ -21,12 +21,7 @@ const ArchitectureViewer: React.FC<ArchitectureViewerProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitError, setIsRateLimitError] = useState<boolean>(false);
-  const [processableStream, setProcessableStream] =
-    useState<ReadableStream<Uint8Array> | null>(null);
-  const [isUsingOriginalStream, setIsUsingOriginalStream] =
-    useState<boolean>(false);
   const [retryCount, setRetryCount] = useState<number>(0);
-  const [isRetrying, setIsRetrying] = useState<boolean>(false);
   const contentContainerRef = useRef<HTMLDivElement>(null);
 
   // Function to scroll to bottom
@@ -36,73 +31,41 @@ const ArchitectureViewer: React.FC<ArchitectureViewerProps> = ({
     }
   };
 
-  // Create a cloned stream or use original stream when the component mounts or when the stream prop changes
+  // Process the stream when component mounts or when retryCount changes
   useEffect(() => {
-    if (!stream) {
-      setError("No stream provided");
-      setIsLoading(false);
-      return;
-    }
+    let isMounted = true;
+    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
-    try {
-      // Check if the original stream is locked
-      if (stream.locked) {
-        console.error("Original architecture stream is locked, cannot clone");
-        console.log(
-          "Architecture stream is locked. This may cause issues with processing."
-        );
-        setIsUsingOriginalStream(true);
-
-        // Instead of immediately setting an error, we can schedule a retry
-        setIsRetrying(true);
-        setTimeout(() => {
-          setRetryCount((prev) => prev + 1);
-          setIsRetrying(false);
-        }, 1000); // Wait 1 second before retry
-
-        return;
-      }
-
-      // Clone the stream to avoid locking issues
-      const [stream1, stream2] = stream.tee();
-      console.log("Architecture stream cloned successfully");
-      setProcessableStream(stream1);
-      setIsUsingOriginalStream(false);
-
-      // Reset other states
+    // Reset state on new stream
+    if (isMounted) {
       setContent("");
       setError(null);
       setIsLoading(true);
       setIsRateLimitError(false);
-    } catch (err) {
-      console.error("Error with architecture stream:", err);
-      // If we can't clone the stream, attempt to use the original
-      if (!stream.locked) {
-        console.log("Falling back to using original stream directly");
-        setProcessableStream(stream);
-        setIsUsingOriginalStream(true);
-        setContent("");
-        setError(null);
-        setIsLoading(true);
-        setIsRateLimitError(false);
-      } else {
-        setError("Failed to prepare stream for reading");
+    }
+
+    if (!stream) {
+      if (isMounted) {
+        setError("No stream provided");
         setIsLoading(false);
       }
+      return;
     }
-  }, [stream, retryCount]);
 
-  // Process the stream
-  useEffect(() => {
-    if (!processableStream) return;
-
-    let isMounted = true;
-    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+    // Check if stream is locked
+    if (stream.locked) {
+      console.log("Architecture stream is locked, cannot read");
+      if (isMounted) {
+        setError("Stream is already being read elsewhere");
+        setIsLoading(false);
+      }
+      return;
+    }
 
     // Function to read the stream
     const processStream = async () => {
       try {
-        reader = processableStream.getReader();
+        reader = stream.getReader();
         const decoder = new TextDecoder();
         let result = "";
 
@@ -124,11 +87,13 @@ const ArchitectureViewer: React.FC<ArchitectureViewerProps> = ({
             setContent(result);
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Architecture stream error:", err);
 
         if (isMounted) {
-          const errorMessage = err.message || "Error processing stream";
+          const errorMessage = typeof err === 'object' && err !== null && 'message' in err 
+            ? (err as Error).message 
+            : "Error processing stream";
           setError(errorMessage);
 
           // Check if this is a rate limit error
@@ -153,14 +118,22 @@ const ArchitectureViewer: React.FC<ArchitectureViewerProps> = ({
       }
     };
 
-    // Start processing
+    // Start processing the stream
     processStream();
 
     // Cleanup function
     return () => {
       isMounted = false;
+      // Make sure to release the reader lock if the component unmounts
+      if (reader) {
+        try {
+          reader.releaseLock();
+        } catch (e) {
+          console.error("Error releasing reader lock during cleanup:", e);
+        }
+      }
     };
-  }, [processableStream, onComplete]);
+  }, [stream, onComplete, retryCount]);
 
   // Add useEffect to scroll to bottom when content changes
   useEffect(() => {
@@ -171,155 +144,114 @@ const ArchitectureViewer: React.FC<ArchitectureViewerProps> = ({
   const handleRetry = () => {
     if (!stream) return;
 
-    setContent("");
-    setError(null);
-    setIsLoading(true);
-    setIsRateLimitError(false);
-
-    // Try to process the stream again
-    try {
-      if (stream.locked) {
-        setError(
-          "Stream is already being read elsewhere and cannot be retried"
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // Try cloning again
-      const [stream1, stream2] = stream.tee();
-      setProcessableStream(stream1);
-      setIsUsingOriginalStream(false);
-    } catch (err) {
-      console.error("Error re-preparing stream for retry:", err);
-
-      // If cloning fails but stream is not locked, try using original
-      if (!stream.locked) {
-        console.log("Retry: Falling back to using original stream directly");
-        setProcessableStream(stream);
-        setIsUsingOriginalStream(true);
-      } else {
-        setError("Failed to prepare stream for retry");
-        setIsLoading(false);
-      }
+    if (stream.locked) {
+      setError("Stream is locked and cannot be retried directly");
+      setIsLoading(false);
+      return;
     }
+
+    // Increment retry count to trigger the useEffect
+    setRetryCount((prev) => prev + 1);
   };
 
   // Loading indicator
   if (isLoading && !content) {
     return (
-      <div className="flex flex-col items-center justify-center py-8">
-        <Loader2 className="text-primary mb-2 h-8 w-8 animate-spin" />
+      <div className="bg-background flex min-h-[200px] flex-col items-center justify-center rounded-lg border p-4">
+        <ArtifactBadge artifactType="architecture" />
+        <Loader2 className="text-primary my-4 h-8 w-8 animate-spin" />
         <p className="text-muted-foreground text-sm">
-          {isRetrying
-            ? "Stream is locked. Waiting to retry..."
-            : "Loading architecture..."}
+          Generating architecture document...
         </p>
       </div>
     );
   }
 
-  // Error display with improved retry options
+  // Error display with retry option
   if (error) {
     return (
-      <div className="p-4">
-        <Alert variant={isRateLimitError ? "destructive" : "default"}>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {isRateLimitError
-              ? "Rate Limit Exceeded"
-              : stream.locked
-                ? "Stream Locked"
-                : "Error Loading Architecture"}
-          </AlertTitle>
-          <AlertDescription>
-            {isRateLimitError
-              ? "Our AI service is currently experiencing high demand. Please wait a few minutes and try again."
-              : stream.locked
-                ? "The architecture stream is being read elsewhere. Please wait a moment and try again."
-                : error}
-          </AlertDescription>
-          <div className="mt-4 flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRetry}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Try Again
-            </Button>
-            {stream.locked && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setRetryCount((prev) => prev + 1)}
-                className="flex items-center gap-2"
-              >
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Wait & Retry
-              </Button>
-            )}
-          </div>
-        </Alert>
-      </div>
+      <Alert variant="destructive" className="my-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>
+          {isRateLimitError ? "Rate Limit Exceeded" : "Error"}
+        </AlertTitle>
+        <AlertDescription className="flex flex-col gap-2">
+          {isRateLimitError
+            ? "The API request was rate limited. Please wait a moment and try again."
+            : error}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2 self-start"
+            onClick={handleRetry}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Retry
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 
   // Content display with markdown support
   return (
-    <div 
-      ref={contentContainerRef}
-      className="prose dark:prose-invert prose-headings:mt-4 prose-headings:mb-2 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:my-2 w-full max-w-full overflow-x-auto p-4 max-h-[500px] overflow-auto"
-    >
-      <div className="mb-2">
+    <div className="flex w-full flex-col">
+      <div className="mb-2 flex items-center">
         <ArtifactBadge artifactType="architecture" />
+        <h3 className="ml-2 text-sm font-medium">Architecture Document</h3>
       </div>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code({ className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className || "");
-            return match ? (
-              <div className="my-4 overflow-hidden rounded">
-                <SyntaxHighlighter
-                  language={match[1]}
-                  style={vscDarkPlus}
-                  customStyle={{ maxWidth: "100%" }}
-                  wrapLines={true}
-                  wrapLongLines={true}
-                >
-                  {String(children).replace(/\n$/, "")}
-                </SyntaxHighlighter>
-              </div>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            );
-          },
-          h1: ({ children }) => (
-            <h1 className="mt-6 mb-3 text-2xl font-bold">{children}</h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="mt-5 mb-2 text-xl font-bold">{children}</h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="mt-4 mb-2 text-lg font-semibold">{children}</h3>
-          ),
-          h4: ({ children }) => (
-            <h4 className="mt-3 mb-1 text-base font-semibold">{children}</h4>
-          ),
-          h5: ({ children }) => (
-            <h5 className="mt-3 mb-1 text-base font-medium">{children}</h5>
-          ),
-          h6: ({ children }) => (
-            <h6 className="mt-3 mb-1 text-sm font-medium">{children}</h6>
-          ),
-        }}
+      <div 
+        ref={contentContainerRef}
+        className="bg-card rounded-lg border p-4 max-h-[500px] overflow-auto"
       >
-        {content || ""}
-      </ReactMarkdown>
+        <div className="prose dark:prose-invert prose-headings:mt-4 prose-headings:mb-2 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-p:my-2 w-full max-w-full overflow-x-auto">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ className, children, ...props }) {
+                const match = /language-(\w+)/.exec(className || "");
+                return match ? (
+                  <div className="my-4 overflow-hidden rounded">
+                    <SyntaxHighlighter
+                      language={match[1]}
+                      style={vscDarkPlus}
+                      customStyle={{ maxWidth: "100%" }}
+                      wrapLines={true}
+                      wrapLongLines={true}
+                    >
+                      {String(children).replace(/\n$/, "")}
+                    </SyntaxHighlighter>
+                  </div>
+                ) : (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                );
+              },
+              h1: ({ children }) => (
+                <h1 className="mt-6 mb-3 text-2xl font-bold">{children}</h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="mt-5 mb-2 text-xl font-bold">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="mt-4 mb-2 text-lg font-semibold">{children}</h3>
+              ),
+              h4: ({ children }) => (
+                <h4 className="mt-3 mb-1 text-base font-semibold">{children}</h4>
+              ),
+              h5: ({ children }) => (
+                <h5 className="mt-3 mb-1 text-base font-medium">{children}</h5>
+              ),
+              h6: ({ children }) => (
+                <h6 className="mt-3 mb-1 text-sm font-medium">{children}</h6>
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      </div>
     </div>
   );
 };

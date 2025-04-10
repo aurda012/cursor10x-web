@@ -275,8 +275,8 @@ export async function POST(
               
               // Buffer for collecting small chunks
               let buffer = "";
-              const BUFFER_SIZE_THRESHOLD = 100; // Reduced from 500 characters to 100 for smoother streaming
-              const BUFFER_TIME_THRESHOLD = 30; // Reduced from 100ms to 30ms to send chunks more frequently
+              const BUFFER_SIZE_THRESHOLD = 20; // Further reduced from 100 to 20 characters for smoother streaming
+              const BUFFER_TIME_THRESHOLD = 20; // Further reduced from 30ms to 20ms to send chunks more frequently
               let lastBufferFlushTime = Date.now();
               
               for await (const chunk of streamingResponse) {
@@ -313,8 +313,32 @@ export async function POST(
                   totalBytes += processedText.length;
                   chunkCount++;
 
-                  // Add to buffer instead of sending directly
-                  buffer += processedText;
+                  // Send immediate tokens for certain patterns to improve perceived speed
+                  if (processedText.includes("\n") || 
+                      processedText.includes(". ") || 
+                      processedText.includes("? ") || 
+                      processedText.includes("! ")) {
+                    // For natural breakpoints like line breaks or end of sentences, send immediately
+                    if (buffer.length > 0) {
+                      buffer += processedText;
+                      if (!safeEnqueue(encoder.encode(buffer))) {
+                        forceLog(`Failed to enqueue immediate chunks for ${artifact}, stopping.`);
+                        break;
+                      }
+                      buffer = "";
+                      lastBufferFlushTime = currentTime;
+                    } else {
+                      // If buffer is empty, just send the current text
+                      if (!safeEnqueue(encoder.encode(processedText))) {
+                        forceLog(`Failed to enqueue immediate text for ${artifact}, stopping.`);
+                        break;
+                      }
+                      lastBufferFlushTime = currentTime;
+                    }
+                  } else {
+                    // For other text, add to buffer
+                    buffer += processedText;
+                  }
                   
                   // Only log key chunks to reduce log volume
                   if (chunkCount === 1 || chunkCount === 10 || chunkCount === 50 || chunkCount % 100 === 0) {
@@ -323,7 +347,7 @@ export async function POST(
                   
                   // Send buffer when it exceeds threshold or time limit
                   const bufferTime = currentTime - lastBufferFlushTime;
-                  if (buffer.length >= BUFFER_SIZE_THRESHOLD || bufferTime >= BUFFER_TIME_THRESHOLD) {
+                  if (buffer.length > 0 && (buffer.length >= BUFFER_SIZE_THRESHOLD || bufferTime >= BUFFER_TIME_THRESHOLD)) {
                     if (!safeEnqueue(encoder.encode(buffer))) {
                       forceLog(`Failed to enqueue buffered chunks for ${artifact}, stopping.`);
                       break;

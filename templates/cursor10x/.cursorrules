@@ -31,10 +31,7 @@ mcp_cursor10x_recordEpisode({actor: "[user/assistant/system]", action: "[action 
 
 ## RULE 8: CONVERSATION END SEQUENCE
 This EXACT sequence MUST be executed at the VERY END of EVERY conversation:
-1. mcp_cursor10x_storeAssistantMessage({content: "[final response summary]", importance: "medium"})
-2. mcp_cursor10x_trackActiveFile({filename: "[relevant files]", action: "view"})
-3. mcp_cursor10x_storeMilestone({title: "Conversation Completion", description: "[what was accomplished]", importance: "medium"})
-4. mcp_cursor10x_recordEpisode({actor: "assistant", action: "completion", content: "[conversation summary]", importance: "medium"})
+mcp_cursor10x_endConversation({content: "[Content of the assistant's final message]", milestone_title: "[Title for the completion milestone]", milestone_description: "[Description of what was accomplished]", important: "[optional |  Importance level (low, medium, high, critical)]", metadata: "[Additional metadata for the operations]" })
 
 ## RULE 9: HEALTH MONITORING
 Memory system health MUST be checked when issues occur:

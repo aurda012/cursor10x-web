@@ -7,11 +7,23 @@ import * as prompts from "@/lib/prompts";
 export const config = {
   runtime: 'edge',
   regions: ['iad1'], // Use the regions closest to your primary user base
-  maxDuration: 60, // Allow up to 60 seconds for generation
+  maxDuration: 300, // Allow up to 300 seconds (5 minutes) for generation - increased from 60 seconds
 };
 
 // In-memory store for chat history (in a production app, use a database)
 const chatHistories = new Map<string, any[]>();
+
+// Function to log even in production mode
+const forceLog = (message: string) => {
+  // This will bypass the removeConsole setting in next.config.ts
+  try {
+    // Use both console methods to maximize chances of logging
+    console.error(`[FORCE_LOG] ${message}`);
+    console.warn(`[FORCE_LOG] ${message}`);
+  } catch (e) {
+    // Ignore any errors in logging
+  }
+};
 
 /**
  * Handler for POST requests to the generate/[artifact] endpoint
@@ -53,7 +65,7 @@ export async function POST(
     // Get API key from environment variables
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error("Missing Gemini API key in environment variables");
+      forceLog("Missing Gemini API key in environment variables");
       return NextResponse.json<ErrorResponse>(
         { error: "Server configuration error" },
         { status: 500 }
@@ -113,9 +125,7 @@ export async function POST(
 
     try {
       // Make a single request to the Gemini API - NO retries
-      console.log(
-        `Making single request to Gemini API for ${artifact} - NO retries`
-      );
+      forceLog(`Making request to Gemini API for ${artifact} - production mode`);
 
       let streamingResponse;
       try {
@@ -181,9 +191,7 @@ export async function POST(
       } catch (error: any) {
         // Check if this is a rate limit error
         if (error.message?.includes("429") || error.status === 429) {
-          console.error(
-            `Gemini API rate limit exceeded for ${artifact} - Returning error to client`
-          );
+          forceLog(`Gemini API rate limit exceeded for ${artifact} - Returning error to client`);
           return NextResponse.json(
             {
               error: "API rate limit exceeded",
@@ -196,10 +204,8 @@ export async function POST(
         }
 
         // Not a rate limit error, log and return generic error
-        console.error(
-          `Non-rate limit error calling Gemini API for ${artifact}:`,
-          error
-        );
+        forceLog(`Non-rate limit error calling Gemini API for ${artifact}: ${error.message || "Unknown error"}`);
+        forceLog(`Full error details: ${JSON.stringify(error, null, 2)}`);
         return NextResponse.json(
           {
             error: "Failed to generate content with AI",
@@ -210,7 +216,7 @@ export async function POST(
       }
 
       if (!streamingResponse) {
-        console.error(`No response returned from Gemini API for ${artifact}`);
+        forceLog(`No response returned from Gemini API for ${artifact}`);
         return NextResponse.json(
           { error: "No response from AI service" },
           { status: 500 }
@@ -264,12 +270,22 @@ export async function POST(
 
             // Process each chunk from the Gemini API stream
             try {
+              forceLog(`Starting chunk processing for ${artifact}`);
+              let chunkTimeStart = Date.now();
+              let lastLogTime = Date.now();
+              
               for await (const chunk of streamingResponse) {
+                const currentTime = Date.now();
+                
                 if (isControllerClosed) {
-                  console.log(
-                    `Controller is closed, stopping streaming for ${artifact}`
-                  );
+                  forceLog(`Controller is closed, stopping streaming for ${artifact}`);
                   break;
+                }
+                
+                // Log progress periodically even in production
+                if (currentTime - lastLogTime > 5000) { // Log every 5 seconds
+                  forceLog(`Still processing chunks for ${artifact}, elapsed time: ${Math.floor((currentTime - chunkTimeStart)/1000)}s, chunks: ${chunkCount}`);
+                  lastLogTime = currentTime;
                 }
 
                 // Get text from the chunk in the new API format
@@ -298,18 +314,20 @@ export async function POST(
 
                   // Log every 5th chunk or the first few chunks
                   if (chunkCount % 5 === 0 || chunkCount < 3) {
-                    console.log(
-                      `Sending chunk ${chunkCount} for ${artifact}, size: ${processedText.length} bytes`
-                    );
+                    forceLog(`Sending chunk ${chunkCount} for ${artifact}, size: ${processedText.length} bytes, total: ${totalBytes} bytes`);
                   }
 
                   // Send the chunk to the client, break if controller is closed
                   if (!safeEnqueue(encoder.encode(processedText))) {
+                    forceLog(`Failed to enqueue chunk ${chunkCount} for ${artifact}, stopping.`);
                     break;
                   }
                 }
               }
+              
+              forceLog(`Completed chunk processing for ${artifact}: ${chunkCount} chunks, ${totalBytes} bytes in ${Math.floor((Date.now() - chunkTimeStart)/1000)}s`);
             } catch (streamError) {
+              forceLog(`Error processing stream for ${artifact}: ${streamError instanceof Error ? streamError.message : String(streamError)}`);
               console.error(
                 `Error processing stream for ${artifact}:`,
                 streamError

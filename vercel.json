@@ -1,1 +1,1 @@
-{"github":{"silent":true},"cleanUrls":true,"functions":{"app/api/generate/[artifact]/route.ts":{"memory":1024,"maxDuration":60},"app/api/package/route.ts":{"memory":1024,"maxDuration":60}},"crons":[{"path":"/api/cron/health","schedule":"0 0 * * *"}]}
+{"github":{"silent":true},"cleanUrls":true,"functions":{"app/api/generate/[artifact]/route.ts":{"memory":2048,"maxDuration":300},"app/api/package/route.ts":{"memory":1024,"maxDuration":60}},"crons":[{"path":"/api/cron/health","schedule":"0 0 * * *"}]}

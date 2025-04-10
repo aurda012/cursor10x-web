@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import JSZip from "jszip";
-import { promises as fs } from "fs";
 import path from "path";
 import { PackageRequestBody } from "@/types";
+
+// Configure with higher default memory and longer execution time for ZIP operations
+export const config = {
+  runtime: 'nodejs',
+  regions: ['iad1'],
+  maxDuration: 60,
+};
 
 /**
  * POST /api/package
@@ -41,59 +47,79 @@ export async function POST(request: NextRequest) {
         throw new Error("Failed to create subdirectories in zip");
       }
 
-      // Define the path to the template directory
-      const templateDir = path.resolve(process.cwd(), "templates", "cursor10x");
-
-      // Modified recursive function to keep the same folder structure from the template
-      const addFilesToZip = async (
-        directoryPath: string,
-        directoryName: string,
-        zipFolder: JSZip
-      ) => {
-        const items = await fs.readdir(directoryPath);
-
-        for (const item of items) {
-          const itemPath = path.join(directoryPath, item);
-          const stats = await fs.stat(itemPath);
-
-          if (stats.isFile()) {
-            // Skip placeholder files that will be replaced with generated content
-            const relativePath = path.relative(templateDir, itemPath);
-
-            // Skip specific placeholder files that will be replaced with content
-            if (
-              relativePath === "docs/blueprint.md" ||
-              relativePath === "docs/architecture.md" ||
-              relativePath === "docs/guide.md" ||
-              relativePath === "tasks/tasks.json"
-            ) {
-              // These will be added with content later
-              continue;
-            }
-
-            // Read and add file
-            const content = await fs.readFile(itemPath);
-            zipFolder.file(item, content);
-          } else if (stats.isDirectory()) {
-            // Create directory in zip
-            const newZipFolder = zipFolder.folder(item);
-
-            if (newZipFolder) {
-              // Recursively add files from subdirectory
-              await addFilesToZip(itemPath, item, newZipFolder);
-            }
-          }
-        }
-      };
-
-      // Add template files to zip - starting from the root now
-      await addFilesToZip(templateDir, "", zip);
-
       // Add generated artifacts to specific files
       docsFolder.file("blueprint.md", artifacts.blueprint || "");
       docsFolder.file("architecture.md", artifacts.architecture || "");
       docsFolder.file("guide.md", artifacts.guide || "");
       tasksFolder.file("tasks.json", artifacts.tasks || "[]");
+      
+      // Add static template files - hardcoded for production deployment
+      // These are the minimum required files for the template to work
+      docsFolder.file("README.md", "# Cursor10x Project\n\nThis project was generated using Cursor10x.");
+      
+      // Add .cursor directory with configuration
+      const cursorFolder = zip.folder(".cursor");
+      if (cursorFolder) {
+        cursorFolder.file("mcp.json", JSON.stringify({
+          "mcpServers": {
+            "cursor10x-mcp": {
+              "command": "npx",
+              "args": ["cursor10x-mcp"],
+              "enabled": true,
+              "env": {
+                "TURSO_DATABASE_URL": "your-turso-database-url",
+                "TURSO_AUTH_TOKEN": "your-turso-auth-token"
+              }
+            }
+          }
+        }, null, 2));
+      }
+
+      // Add .cursorrules file
+      zip.file(".cursorrules", `
+# Cursor10x Rules
+- Follow Memory System guidelines
+- Implement Project Tasks sequentially
+- Track active files during implementation
+- Store milestones when completing tasks
+      `);
+
+      // Add .gitignore
+      zip.file(".gitignore", `
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# build
+/.next/
+/out/
+/build
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# turbo
+.turbo
+
+# vercel
+.vercel
+      `);
 
       // Generate the zip content
       const zipBuffer = await zip.generateAsync({

@@ -3,6 +3,13 @@ import { GoogleGenAI } from "@google/genai";
 import { GenerateRequestBody, ErrorResponse } from "@/types";
 import * as prompts from "@/lib/prompts";
 
+// Configure with higher default memory and longer execution time for AI generation
+export const config = {
+  runtime: 'edge',
+  regions: ['iad1'], // Use the regions closest to your primary user base
+  maxDuration: 60, // Allow up to 60 seconds for generation
+};
+
 // In-memory store for chat history (in a production app, use a database)
 const chatHistories = new Map<string, any[]>();
 
@@ -17,18 +24,16 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { artifact: string } }
 ) {
-  // Await the params object before accessing its properties
-  const resolvedParams = await params;
+  // Get artifact name from params
+  const { artifact } = params;
+  
   console.log(
-    `Received request to generate artifact: ${resolvedParams.artifact}`
+    `Received request to generate artifact: ${artifact}`
   );
 
   try {
     // Parse the request body
     const body = (await request.json()) as GenerateRequestBody;
-
-    // Extract the artifact name from route params
-    const { artifact } = resolvedParams;
 
     // Validate inputs
     if (!body.userAnswers) {

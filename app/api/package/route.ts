@@ -53,10 +53,6 @@ export async function POST(request: NextRequest) {
       docsFolder.file("guide.md", artifacts.guide || "");
       tasksFolder.file("tasks.json", artifacts.tasks || "[]");
       
-      // Add static template files - hardcoded for production deployment
-      // These are the minimum required files for the template to work
-      docsFolder.file("README.md", "# Cursor10x Project\n\nThis project was generated using Cursor10x.");
-      
       // Add .cursor directory with configuration
       const cursorFolder = zip.folder(".cursor");
       if (cursorFolder) {
@@ -132,43 +128,6 @@ export async function POST(request: NextRequest) {
 - Store milestones when completing tasks
         `);
       }
-
-      // Add .gitignore
-      zip.file(".gitignore", `
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# build
-/.next/
-/out/
-/build
-/dist
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
-
-# turbo
-.turbo
-
-# vercel
-.vercel
-      `);
 
       // Generate the zip content
       const zipBuffer = await zip.generateAsync({

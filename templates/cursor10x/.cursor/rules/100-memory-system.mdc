@@ -11,119 +11,125 @@ The Cursor10x Memory System provides persistent context awareness across convers
 - Long-term memory (milestones, decisions, requirements)
 - Episodic memory (chronological actions and events)
 
-## Response Start Sequence
+## TOOL EXECUTION PATTERN
 
-The AI **MUST** execute this exact sequence at the start of EVERY response, without exception:
+The memory system follows a strict tool execution pattern:
 
-1. Generate and display memory banner
-   ```
-   mcp_cursor10x_generateBanner({})
-   ```
+```javascript
+// ✅ DO: Follow this execution pattern for ALL conversations
+// 1. BEGIN with initConversation - EXACTLY ONCE at the start
+// 2. USE appropriate tools throughout the conversation as needed
+// 3. END with endConversation - EXACTLY ONCE at the very end
 
-2. Retrieve comprehensive context
-   ```
-   mcp_cursor10x_getComprehensiveContext({})
-   ```
-
-## Conversation End Sequence
-
-The AI **MUST** execute this sequence before ending a conversation without exception:
-
-1. Store important assistant response
-   ```
-   mcp_cursor10x_endConversation({
-    content: "Content of the assistant's final message",
-    milestone_title: "Title for the completion milestone",
-    milestone_description: "Description of what was accomplished",
-    important: "optional |  Importance level (low, medium, high, critical)",
-    metadata: "Additional metadata for the operations" 
-  })
-  ```
-
-## Automatic Memory Tools Usage
-
-The AI **MUST** use the following memory tools automatically throughout every interaction:
-
-- **For User Messages**
-  ```
-  mcp_cursor10x_storeUserMessage({
-    content: "User message content", 
-    importance: "medium"
-  })
-  ```
-
-- **For Assistant Messages**
-  ```
-  mcp_cursor10x_storeAssistantMessage({
-    content: "Assistant response content", 
-    importance: "medium"
-  })
-  ```
-
-- **For Project Milestones**
-  ```
-  mcp_cursor10x_storeMilestone({
-    title: "Milestone Title", 
-    description: "Description of what was accomplished",
-    importance: "medium"
-  })
-  ```
-
-- **For Project Decisions**
-  ```
-  mcp_cursor10x_storeDecision({
-    title: "Decision Title", 
-    content: "What was decided", 
-    reasoning: "Why it was decided",
-    importance: "medium"
-  })
-  ```
-
-- **For Project Requirements**
-  ```
-  mcp_cursor10x_storeRequirement({
-    title: "Requirement Title", 
-    content: "Description of requirement",
-    importance: "medium"
-  })
-  ```
-
-- **For Active File Tracking**
-  ```
-  mcp_cursor10x_trackActiveFile({
-    filename: "path/to/file", 
-    action: "view"
-  })
-  ```
-
-## Context Gathering
-
-The AI **MUST** use context tools at the start of EVERY response without exception:
-
-```
-mcp_cursor10x_getComprehensiveContext({})
-
-mcp_cursor10x_getRecentMessages({limit: 5})
-
-mcp_cursor10x_getActiveFiles({limit: 3})
+// ❌ DON'T: Call initConversation multiple times in one response
+// ❌ DON'T: Call endConversation in the middle of a conversation
+// ❌ DON'T: Skip storing important context or decisions
 ```
 
-## Memory System Health
+## RULE 1: CONVERSATION INITIALIZATION
+The FIRST action in the BEGINNING of EVERY response MUST be to initialize the conversation with this single tool call and display the banner from the response immediately after. It MUST be called EXACTLY ONCE per conversation and ONLY at the very beginning after receiving user input:
 
-The AI **SHOULD** check memory system health when experiencing context issues:
+```javascript
+// ✅ DO: Call EXACTLY ONCE at the beginning of EVERY conversation
+mcp_cursor10x_initConversation({content: "[user message]", importance: "[low/medium/high/critical]"})
 
+// ❌ DON'T: Call multiple times within the same conversation
+// ❌ DON'T: Call in the middle or end of a conversation
+// ❌ DON'T: Skip calling this at the start
 ```
+
+## RULE 2: ASSISTANT MESSAGE STORAGE
+EVERY assistant response containing important information MUST be stored. This can be called MULTIPLE times as needed during a conversation to store significant assistant responses:
+
+```javascript
+// ✅ DO: Call when storing important information
+mcp_cursor10x_storeAssistantMessage({content: "[assistant response]", importance: "[low/medium/high/critical]"})
+
+// ✅ DO: Store multiple distinct responses when appropriate
+```
+
+## RULE 3: ACTIVE FILE TRACKING
+EVERY file being worked on or modified MUST be tracked - not files being read. This should be called whenever starting work on a file:
+
+```javascript
+// ✅ DO: Track when editing or creating files
+mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[edit/create]"})
+
+// ❌ DON'T: Track files that are only being read
+```
+
+## RULE 4: MILESTONE RECORDING
+ALL completed tasks or achievements MUST be recorded as milestones. Use this to mark significant accomplishments:
+
+```javascript
+// ✅ DO: Record milestones when completing important tasks
+mcp_cursor10x_storeMilestone({title: "[milestone title]", description: "[milestone description]", importance: "[low/medium/high/critical]"})
+```
+
+## RULE 5: DECISION RECORDING
+ALL important project decisions MUST be recorded. Use this when making significant decisions:
+
+```javascript
+// ✅ DO: Record important decisions with reasoning
+mcp_cursor10x_storeDecision({title: "[decision title]", content: "[decision content]", reasoning: "[decision reasoning]", importance: "[low/medium/high/critical]"})
+```
+
+## RULE 6: REQUIREMENT RECORDING
+ALL project requirements MUST be documented. Use this when identifying or defining requirements:
+
+```javascript
+// ✅ DO: Document project requirements
+mcp_cursor10x_storeRequirement({title: "[requirement title]", content: "[requirement content]", importance: "[low/medium/high/critical]"})
+```
+
+## RULE 7: EPISODE RECORDING
+ALL significant events or actions MUST be recorded as episodes. Use this to track important interactions:
+
+```javascript
+// ✅ DO: Record significant events
+mcp_cursor10x_recordEpisode({actor: "[user/assistant/system]", action: "[action type]", content: "[action details]", importance: "[low/medium/high/critical]"})
+```
+
+## RULE 8: CONVERSATION END SEQUENCE
+This EXACT sequence MUST be executed at the VERY END of EVERY conversation and EXACTLY ONCE per conversation:
+
+```javascript
+// ✅ DO: Call EXACTLY ONCE at the very end of the conversation
+mcp_cursor10x_endConversation({content: "[Content of the assistant's final message]", milestone_title: "[Title for the completion milestone]", milestone_description: "[Description of what was accomplished]", importance: "[low/medium/high/critical]", metadata: "[Additional metadata for the operations]" })
+
+// ❌ DON'T: Call in the middle of a conversation
+// ❌ DON'T: Call multiple times
+// ❌ DON'T: Skip calling this at the end
+```
+
+## RULE 9: HEALTH MONITORING
+Memory system health MUST be checked when issues occur:
+
+```javascript
+// ✅ DO: Check health when troubleshooting problems
 mcp_cursor10x_checkHealth({})
+```
 
+## RULE 10: MEMORY STATISTICS
+Memory statistics MUST be gathered periodically:
+
+```javascript
+// ✅ DO: Get memory stats when useful for context
 mcp_cursor10x_getMemoryStats({})
 ```
 
-## Banner Generation
+## RULE 11: CONTEXT RETRIEVAL
+Use context retrieval tools as needed throughout the conversation:
 
-The AI **MUST** generate a memory banner at the start of EVERY response:
+```javascript
+// ✅ DO: Get comprehensive context when needed
+mcp_cursor10x_getComprehensiveContext({})
 
-```
-mcp_cursor10x_generateBanner({})
+// ✅ DO: Get recent messages when relevant
+mcp_cursor10x_getRecentMessages({limit: 5, importance: "high"})
+
+// ✅ DO: Get active files when working on code
+mcp_cursor10x_getActiveFiles({limit: 5})
 ```
 
 ## Importance Levels
@@ -133,23 +139,3 @@ When storing memory items, use appropriate importance levels:
 - **medium**: Useful context, standard work
 - **high**: Critical decisions, major features
 - **critical**: Core architecture, security, data-integrity
-
-## Automatic Data Storage Triggers
-
-The AI **MUST** automatically store memories based on these triggers without exception:
-
-1. **User Messages**
-   - Store EVERY message containing requirements, decisions, or important information
-   - Store EVERY message containing questions or instructions about the project
-   
-2. **Assistant Messages**
-   - Store EVERY response providing explanations or solutions
-   - Store EVERY response making recommendations or drawing conclusions
-   
-3. **Milestones**
-   - Store when completing ANY task or feature
-   - Store when resolving ANY issue or implementing a solution
-   
-4. **Active Files**
-   - Track EVERY code file being discussed or modified
-   - Track EVERY configuration or documentation file referenced
